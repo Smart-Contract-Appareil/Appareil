@@ -25,14 +25,14 @@ contract Appareil is Whitelist{
     event changeOfStatusEvent(int newStatus);
     
     //Contant strings for event use 
-    final string rep = "Réparation";
-    final string mtn = "Maintenance" ;
-    final string inst = "Installation : ";
+    string rep = "Réparation";
+    string mtn = "Maintenance" ;
+    string inst = "Installation : ";
 
     
     /**
    * @dev set the device/equipment key informations and status to working (=1)
-   * @param string cat category of the equipment (ex :cold / hot / AC)
+   * @param cat category of the equipment (ex :cold / hot / AC)
    * @param a_type type of the equipment (ex: oven, refrigerator , microwave)
    * @param marque brand of the equipment
    * @param ref reference of the equipment
@@ -51,11 +51,14 @@ contract Appareil is Whitelist{
             appareil.statut = 0;
             emit changeOfStatusEvent(appareil.statut);
         }
+        else{
+            revert("Une demande d'intervention a déjà été effectuée / Pas d'appareil existant");
+        }
     }
     
     /**
    * @dev Change the status is needed and log the work done or reasons of reparation failure
-   * @param string newStatus status of the equipment after the intervention
+   * @param newStatus status of the equipment after the intervention
    * @param work_or_reason list of work done (reparations/cleaning/piece changing etc.) or reason of reparation impossibility
    */
     function logIntervention (int newStatus, string[] memory work_or_reason) public onlyTechnicians {
