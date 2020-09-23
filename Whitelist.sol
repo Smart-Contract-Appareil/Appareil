@@ -3,19 +3,23 @@ import "./Ownable.sol";
 
 /**
  * @title Whitelist
- * @dev The Whitelist contract has a whitelist of addresses, and provides basic authorization control functions.
+ * @dev The Whitelist contract has 2 whitelists of addresses (technicians and client) and provides basic authorization control functions.
  * @dev This simplifies the implementation of "user permissions".
  */
 contract Whitelist is Ownable {
+  //Store the technicians addresses
   mapping(address => bool) public technicians;
+  //Store the client addresses (if many account in the same company)
   mapping(address => bool) public client;
 
-
+  //Technician address added to technicians whitelist event 
   event TechnicianAddressAdded(address addr);
+  //Technician address removed to technicians whitelist event 
   event TechnicianAddressRemoved(address addr);
 
-
+  //Client address added to client whitelist event
   event ClientAddressAdded(address addr);
+  //Client address removed to client whitelist event
   event ClientAddressRemoved(address addr);
 
 
