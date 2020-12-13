@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Nouvel appareil</title>
+    <link rel="stylesheet" href="style_deployContract.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script language = "javascript" type="text/javascript" src="abi.js"></script>
+    <script type="module" src="bytecode.js"></script>
+    <script src="https://unpkg.com/@metamask/detect-provider/dist/detect-provider.min.js"></script>
+
+
+  
+    </head>
+    
+    <body>
+        
+        
+        <script>
+            
+                    // Library Imports
+            //const Web3 = require('web3');
+            //const EthereumTx = require('ethereumjs-tx').Transaction;
+           
+            
+
+            // Connection Initialization
+             //const web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/058e11d6dc1346f089861ed1c87ce6b8"))
+            let web3 = new Web3;
+            const ethEnabled = () => {
+            if (window.ethereum) {
+              window.web3 = new Web3(window.ethereum);
+              window.ethereum.enable();
+              return true;
+            }
+            return false;
+            }
+            
+        
+
+            //Contract object and account info
+
+            const bytecode1 = fs.readFileSync('./bytecode.js');
+            const abi1 = JSON.parse(fs.readFileSync('./abi.js'));
+
+            let deploy_contract = new web3.eth.Contract(abi1);
+            let account = '0x542b817700C2A772E0DE966673fF6B5D39734677';
+            
+
+
+            // Function Parameter
+            let payload = {
+                data: Bytecode
+            }
+
+            let parameter = {
+                from: account,
+                gas: web3.utils.toHex(800000),
+                gasPrice: web3.utils.toHex(web3.utils.toWei('30', 'gwei'))
+            }
+
+            // Function Call
+            deploy_contract.deploy(payload).send(parameter, (err, transactionHash) => {
+                console.log('Transaction Hash :', transactionHash);
+            }).on('confirmation', () => {}).then((newContractInstance) => {
+                console.log('Deployed Contract Address : ', newContractInstance.options.address);
+            })
+        
+        </script>
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2>My Repair</h2>
+                <ul>
+                    <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                    <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                    <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>
+                    
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Ajout d'un nouvel appareil</div> 
+
+                <div class="formulaire">
+                <form action="">
+                    <p><i>À compléter lors de l'achat d'un nouvel appareil</em></p><br>
+                    <fieldset>
+                        <br>
+                    <label for="cat">Catégorie:</label>
+                    <input type="text" id="cat" name="cat" value="" required><br><br>
+                    
+        
+                    <label for="a_type">Type:</label>
+                    <input type="text" id="a_type" name="a_type" value=""required><br><br>
+        
+                    <label for="marque">Marque:</label>
+                    <input type="text" id="marque" name="marque" value=""required><br><br>
+        
+                    <label for="ref">Référence:</label>
+                    <input type="text" id="ref" name="ref" value=""required><br><br>
+        
+                    <label for="nb_serie">Numéro de série:</label>
+                    <input type="text" id="nb_serie" name="nb_serie" value=""required><br><br>
+                    </fieldset><br>
+        
+                    <input type="submit" value="VALIDER">
+
+                </form>
+                </div>
+
+            </div>
+           
+    
+
+
+
+    
+    </body>
+</html>
