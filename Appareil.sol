@@ -5,7 +5,7 @@ pragma solidity ^0.6.12;
 import "./Whitelist.sol";
 import "./Ownable.sol";
 
-contract Appareil is Whitelist{
+contract Appareils is Whitelist{
     
     //Model an equipment 
     struct Appareil{
