@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <head>
+            <meta charset='utf-8'>
+            <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+            <title>Web 3 Demo</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+
+            <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+        </head>
+    </head>
+
+    <body>
+
+        Web 3 Demo
+        <br >
+        <button onclick="printCoolNumber();">Print Cool Number</button>
+        <button onclick="changeCoolNumber();">Change Cool Number</button>
+        <br /><br />
+        Status: <span id="status">Loading...</span>
+        <script type="text/javascript">
+            //import detectEthereumProvider from '@metamask/detect-provider';
+            //const provider = await detectEthereumProvider();
+            
+            async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }
+            /*
+            if (provider) {
+                startApp(provider); // Initialize your app
+            } 
+            else {
+                console.log('Please install MetaMask!');
+            }
+
+            function startApp(provider) {
+                if (provider !== window.ethereum) {
+                    console.error('Do you have multiple wallets installed?');
+                }
+            }      */      
+
+            async function loadContract() {
+                return await new window.web3.eth.Contract([
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "uint256",
+                                "name": "_coolNumber",
+                                "type": "uint256"
+                            }
+                        ],
+                        "name": "setCoolNumber",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "coolNumber",
+                        "outputs": [
+                            {
+                                "internalType": "uint256",
+                                "name": "",
+                                "type": "uint256"
+                            }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                ], '0xd9145CCE52D386f254917e481eB44e9943F39138');
+            }
+
+            async function printCoolNumber() {
+                updateStatus('fetching Cool Number...');
+                const coolNumber = await window.contract.methods.coolNumber().call();
+                updateStatus("coolNumber: ${coolNumber}");
+            }
+
+            async function changeCoolNumber() {
+                const value = Math.floor(Math.random() * 100);
+                updateStatus('Updating coolNumber with ${value}');
+                const account = '0xC8134fA8C874359e9aa8ECd005aF6a409446a59A';
+                const coolNumber = await window.contract.methods.setCoolNumber(value).send({from: account});
+            }
+
+            async function load() {
+                await loadWeb3();
+                window.contract = await loadContract();
+                updateStatus('Ready!');
+            }
+
+            function updateStatus(status) {
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML = status;
+                console.log(status);
+            }
+
+            load();
+        </script>
+    </body>
+
+</html>
