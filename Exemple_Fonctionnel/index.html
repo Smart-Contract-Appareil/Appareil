@@ -1,57 +1,91 @@
 <!DOCTYPE html>
-<html >
-  <head>
-    <title>Register information at Blockchain</title>
+<html>
+    <head>
+        <head>
+            <meta charset='utf-8'>
+            <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+            <title>Web 3 Demo</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
 
-    <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
-    <script type="node_modules" src="index.js"></script>
-    <script language="javascript" type="text/javascript" src="abi.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-  </head>
+            <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+        </head>
+    </head>
 
-  <body class="container">
+    <body>
 
-    <h1 class="page-header">Register information at Blockchain - RSK network</h1>
+        Web 3 Demo
+        <br >
+        <button onclick="printCoolNumber();">Print Cool Number</button>
+        <button onclick="changeCoolNumber();">Change Cool Number</button>
+        <br /><br />
+        Status: <span id="status">Loading...</span>
+        <script type="text/javascript">            
+            async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
 
-    <div class="row">
-      <div>
-        <h3 class="sub-header">Set information</h3>
-        <form class="form-inline" role="form">
-          <div class="form-group">
-            <table>
-              <tr>
-                <td><label for="newInfo">Info:</label> </td>
-                <td>
-                  <input class="form-control" id="newInfo">
-                </td>
-              </tr>
-            </table>
-          </div>
-          <a href="#" onclick="registerSetInfo()" class="btn btn-primary">Set</a>
-        </form>
-      </div>
-    </div>
+            async function loadContract() {
+                return await new window.web3.eth.Contract([
+                    {
+                        "inputs": [
+                            {
+                                "internalType": "uint256",
+                                "name": "_coolNumber",
+                                "type": "uint256"
+                            }
+                        ],
+                        "name": "setCoolNumber",
+                        "outputs": [],
+                        "stateMutability": "nonpayable",
+                        "type": "function"
+                    },
+                    {
+                        "inputs": [],
+                        "name": "coolNumber",
+                        "outputs": [
+                            {
+                                "internalType": "uint256",
+                                "name": "",
+                                "type": "uint256"
+                            }
+                        ],
+                        "stateMutability": "view",
+                        "type": "function"
+                    }
+                ], '0x4DccC303a98C481c322Cd74a21909C122Aa3544A');
+            }
 
-    <div class="row">
-      <div>
-        <h3 class="sub-header">Get last information saved</h3>
-        <form class="form-inline" role="form">
-          <a href="#" onclick="registerGetInfo()" class="btn btn-primary">Get</a>
-          <div class="form-group">
-            <table>
-              <tr>
-                <td>Info:</td>
-                <td>
-                  <label id="lastInfo">
-                </td>
-              </tr>
-            </table>
-          </div>
-        </form>
-      </div>
-    </div>
+            async function printCoolNumber() {
+                updateStatus('fetching Cool Number...');
+                const coolNumber = await window.contract.methods.coolNumber().call();
+                updateStatus(`coolNumber: ${coolNumber}`);
+            }
 
-  </body>
+            async function changeCoolNumber() {
+                const value = Math.floor(Math.random() * 100);
+                updateStatus(`Updating coolNumber with ${value}`);
+                const account = '0xC8134fA8C874359e9aa8ECd005aF6a409446a59A';
+                const coolNumber = await window.contract.methods.setCoolNumber(value).send({from: account});
+                updateStatus('Updated.');
+            }
+
+            async function load() {
+                await loadWeb3();
+                window.contract = await loadContract();
+                updateStatus('Ready!');
+            }
+
+            function updateStatus(status) {
+                const statusEl = document.getElementById('status');
+                statusEl.innerHTML = status;
+                console.log(status);
+            }
+
+            load();
+        </script>
+    </body>
+
 </html>
-
