@@ -1,4 +1,4 @@
-[
+const ABI = [
 	{
 		"anonymous": false,
 		"inputs": [
@@ -78,6 +78,19 @@
 		"type": "event"
 	},
 	{
+		"inputs": [],
+		"name": "a_type",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "address",
@@ -127,37 +140,19 @@
 	},
 	{
 		"inputs": [],
-		"name": "appareil",
+		"name": "askIntervention",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "brand",
 		"outputs": [
 			{
 				"internalType": "string",
-				"name": "categorie",
+				"name": "",
 				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "a_type",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "marque",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "ref",
-				"type": "string"
-			},
-			{
-				"internalType": "string",
-				"name": "nb_serie",
-				"type": "string"
-			},
-			{
-				"internalType": "int256",
-				"name": "statut",
-				"type": "int256"
 			}
 		],
 		"stateMutability": "view",
@@ -165,9 +160,15 @@
 	},
 	{
 		"inputs": [],
-		"name": "askIntervention",
-		"outputs": [],
-		"stateMutability": "nonpayable",
+		"name": "categorie",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
@@ -215,6 +216,19 @@
 				"internalType": "address",
 				"name": "",
 				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "refer",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
 			}
 		],
 		"stateMutability": "view",
@@ -269,6 +283,19 @@
 		"type": "function"
 	},
 	{
+		"inputs": [],
+		"name": "serial_n",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [
 			{
 				"internalType": "string",
@@ -277,7 +304,7 @@
 			},
 			{
 				"internalType": "string",
-				"name": "a_type",
+				"name": "ap_type",
 				"type": "string"
 			},
 			{
@@ -299,6 +326,19 @@
 		"name": "setAppareil",
 		"outputs": [],
 		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "statut",
+		"outputs": [
+			{
+				"internalType": "int256",
+				"name": "",
+				"type": "int256"
+			}
+		],
+		"stateMutability": "view",
 		"type": "function"
 	},
 	{
