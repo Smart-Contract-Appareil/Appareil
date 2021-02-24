@@ -7,12 +7,12 @@ import "./Ownable.sol";
 contract Appareil is Whitelist{
     
     //Model an equipment 
-    string categorie;
-    string a_type;
-    string brand;
-    string refer;
-    string serial_n;
-    int statut; // 1 = en marche, 0 = HS , -1 = définitivement HS
+    string  public categorie;
+    string  public a_type;
+    string  public brand;
+    string  public refer;
+    string  public serial_n;
+    int  public statut; // 1 = en marche, 0 = HS , -1 = définitivement HS
     
     
     //Intervention event
