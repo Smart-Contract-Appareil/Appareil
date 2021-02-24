@@ -7,17 +7,13 @@ import "./Ownable.sol";
 contract Appareil is Whitelist{
     
     //Model an equipment 
-    struct Appareil{
-        string categorie;
-        string a_type;
-        string marque;
-        string ref;
-        string nb_serie;
-        int statut; // 1 = en marche, 0 = HS , -1 = définitivement HS
-    }
+    string categorie;
+    string a_type;
+    string brand;
+    string refer;
+    string serial_n;
+    int statut; // 1 = en marche, 0 = HS , -1 = définitivement HS
     
-    //Store the equipment informations and status 
-    Appareil public appareil ;
     
     //Intervention event
     event interventionEvent(string work_or_reason);
@@ -27,19 +23,24 @@ contract Appareil is Whitelist{
     //Contant strings for event use 
     string rep = "Réparation";
     string mtn = "Maintenance" ;
-    string inst = "Installation : ";
+    string inst = "Installation";
 
     
     /**
    * @dev set the device/equipment key informations and status to working (=1)
    * @param cat category of the equipment (ex :cold / hot / AC)
-   * @param a_type type of the equipment (ex: oven, refrigerator , microwave)
+   * @param ap_type type of the equipment (ex: oven, refrigerator , microwave)
    * @param marque brand of the equipment
    * @param ref reference of the equipment
    * @param nb_serie serial number 
    */
-    function setAppareil (string memory cat, string memory a_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
-        appareil = Appareil(cat, a_type, marque, ref, nb_serie, 1);
+    function setAppareil (string memory cat, string memory ap_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
+        categorie = cat;
+        a_type = ap_type;
+        brand = marque;
+        refer = ref;
+        serial_n = nb_serie;
+        statut = 1;
         emit interventionEvent(inst);
     }
     
@@ -47,9 +48,9 @@ contract Appareil is Whitelist{
    * @dev set the equipment status to 0 to ask for an intervention
    */
     function askIntervention() public onlyClient {
-        if(appareil.statut == 1){
-            appareil.statut = 0;
-            emit changeOfStatusEvent(appareil.statut);
+        if(statut == 1){
+            statut = 0;
+            emit changeOfStatusEvent(statut);
         }
         else{
             revert("Une demande d'intervention a déjà été effectuée / Pas d'appareil existant");
@@ -63,13 +64,13 @@ contract Appareil is Whitelist{
    */
     function logIntervention (int newStatus, string[] memory work_or_reason) public onlyTechnicians {
         if (newStatus <= 1 && newStatus >= -1){
-            if (appareil.statut == 0)
+            if (statut == 0)
                 emit interventionEvent(rep);
-            else if (appareil.statut == 1)
+            else if (statut == 1)
                 emit interventionEvent(mtn);
                 
-            if(appareil.statut != newStatus){
-                appareil.statut = newStatus;
+            if(statut != newStatus){
+                statut = newStatus;
                 emit changeOfStatusEvent(newStatus);
             }   
             for (uint256 i = 0; i < work_or_reason.length; i++) {
