@@ -7,3 +7,10 @@ Set up of the local HTTP server (Node.js) in cmd line (https://www.youtube.com/w
 ```
 http-server "app_path"
 ```
+TO USE 
+
+test.html
+changeInfo.html
+logIntervention.html
+
+abi.js
