@@ -11,24 +11,24 @@
             <script type="text/javascript" src="abi.js"></script>
         </head>
     </head>
-    <h1>Test</h1>
+    <h1>Compléter les informations</h1>
 
     <form>
         <table>
             <div>
                 Catégorie d'appareil : 
                 <select name="Categorie" id = "cat_select" class = "custom-select">
-                    <option value="">--Please choose a category--</option>
-                    <option value="Cold">Cold</option>
-                    <option value="Hot">Hot</option>
-                    <option value="AC">AC</option>
+                    <option value="">--Choisissez une catégorie--</option>
+                    <option value="Froid">Froid</option>
+                    <option value="Chaud">Chaud</option>
+                    <option value="Climatisation">Climatisation</option>
                 </select>
             </div>
             <br></br>
             <div>
                 Type d'appareil : 
             <select name="Type" id = "type_select" class = "custom-select">
-                <option value="">--Please choose a type--</option>
+                <option value="">--Choisissez un type d'appareil--</option>
                 <option value="Armoire à température négative">Armoire à température négative</option>
                 <option value="Armoire à température positive">Armoire à température positive</option>
                 <option value="Cellule de refroidissement">Cellule de refroidissement</option>
@@ -61,7 +61,8 @@
     <button onclick = "setInfoAppareil()">Enregistrer les informations</button>
 
     <script type="text/javascript">
-        var contractAddress = '0x493aE4B525885dd1B3164ecC27531D632d4e3BFe';
+        var contractAddress = '0x5b066594180529EF12ad59C30d5C31A1347fBb02';
+        var account = "0x7755414216938522c7dEC813F143dBc0ad6dc84A" ;
 
         async function loadWeb3() {
                 if (window.ethereum) {
@@ -73,16 +74,13 @@
         async function loadContract() {
                 return await new window.web3.eth.Contract(ABI, contractAddress);
             }
-        
 
         async function load() {
             await loadWeb3();
             window.contract = await loadContract();
-
         }
 
         load();
-        account = "0x7755414216938522c7dEC813F143dBc0ad6dc84A" ;
 
         async function setInfoAppareil() {
             const cat = document.getElementById('cat_select').value;
@@ -94,6 +92,17 @@
             console.log("cat =" + cat + ", a_type = " + a_type + ", brand= "+ brand +" ,ref = "+ ref + " ,serial_n = "+ serial_n);
             const Appareil = await window.contract.methods.setAppareil(cat,a_type,brand,ref,serial_n).send({from: account});
         }
+
+        async function printInfoAppareil() {             
+            const Appareil = await window.contract.appareil.call();
+            console.log(Appareil);
+        }
+
+        async function printCoolNumber() {
+                updateStatus('fetching Cool Number...');
+                const coolNumber = await window.contract.methods.coolNumber().call();
+                updateStatus(`coolNumber: ${coolNumber}`);
+            }
 
     </script>
 

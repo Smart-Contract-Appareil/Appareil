@@ -14,69 +14,57 @@
 
     <body>
 
-        Web 3 Demo
-        <br >
-        <button onclick="printCoolNumber();">Print Cool Number</button>
-        <button onclick="changeCoolNumber();">Change Cool Number</button>
-        <br /><br />
+        <h1> Informations de l'appareil </h1>
+
+        
+        Catégorie : <span id="categorie">Loading...</span> <br></br>
+        Type : <span id="a_type">Loading...</span> <br></br>
+        Marque : <span id="marque">Loading...</span> <br></br>
+        Référence : <span id="ref">Loading...</span> <br></br>
+        N° de série : <span id="nb_serie">Loading...</span> <br></br>
+        Statut: <span id="statut">Loading...</span> <br></br>
+        <br></br>
 
         <a href = "changeInfo.html">
-            <button onclick ="passContractAddress">Set appareil information</button>
+            <button>Changer les informations</button>
         </a>
-        Status: <span id="status">Loading...</span>
-        <script type="text/javascript">            
-            var contractAddress = '0x493aE4B525885dd1B3164ecC27531D632d4e3BFe';
+        &nbsp &nbsp &nbsp
+        <button onclick = "demande()"> Demander une intervention </button>
+        &nbsp &nbsp &nbsp
 
-            function passContractAddress(){
-                localStorage.setItem("contractAddress", contractAddress );
-                return False;
-            }
+        <a href = "logIntervention.html"></a>
+        <button> Enregistrer des travaux </button>
+        </a>
+        
+        <script type="text/javascript">            
+            var contractAddress = '0x5b066594180529EF12ad59C30d5C31A1347fBb02';
+            var account = "0x7755414216938522c7dEC813F143dBc0ad6dc84A" ;
+
             async function loadWeb3() {
                 if (window.ethereum) {
                     window.web3 = new Web3(window.ethereum);
                     window.ethereum.enable();
                 }
             }    
-            
+          
             async function loadContract() {
                 return await new window.web3.eth.Contract(ABI, contractAddress);
             }
 
-            async function setInfoAppareil() {
-                const cat = document.getElementById('categorie');
-                const a_type = document.getElementById('type');
-                const brand = document.getElementById('marque');
-                const ref = document.getElementById('reference');
-                const serial_n = document.getElementById('n_serie');
-                await window.contract.setAppareil(cat,a_type,brand,ref,serial_n) 
-            }
-            async function printCoolNumber() {
-                updateStatus('fetching Cool Number...');
-                const coolNumber = await window.contract.methods.coolNumber().call();
-                updateStatus(`coolNumber: ${coolNumber}`);
-            }
-
-            async function changeCoolNumber() {
-                const value = Math.floor(Math.random() * 100);
-                updateStatus(`Updating coolNumber with ${value}`);
-                const account = '0xC8134fA8C874359e9aa8ECd005aF6a409446a59A';
-                const coolNumber = await window.contract.methods.setCoolNumber(value).send({from: account});
-                updateStatus('Updated.');
-            }
 
             async function load() {
                 await loadWeb3();
                 window.contract = await loadContract();
-                updateStatus('Ready!');
-            }
 
-            function updateStatus(status) {
-                const statusEl = document.getElementById('status');
-                statusEl.innerHTML = status;
-                console.log(status);
             }
 
             load();
+
+            async function demande(){
+                console.log("Changing status to 0");
+                const status = await window.contract.methods.askIntervention().send({from: account});
+            }
+
         </script>
     </body>
 
