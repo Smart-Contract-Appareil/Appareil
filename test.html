@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <head>
+            <meta charset='utf-8'>
+            <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+            <title>Web 3 Demo</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+            <script type="text/javascript" src="abi.js"></script>
+        </head>
+    </head>
+
+    <body>
+
+        <h1> Informations de l'appareil </h1>
+
+        
+        Catégorie : <span id="categorie">Loading...</span> <br></br>
+        Type : <span id="a_type">Loading...</span> <br></br>
+        Marque : <span id="marque">Loading...</span> <br></br>
+        Référence : <span id="ref">Loading...</span> <br></br>
+        N° de série : <span id="nb_serie">Loading...</span> <br></br>
+        Statut: <span id="statut">Loading...</span> <br></br>
+        <br></br>
+
+        <a href = "changeInfo.html">
+            <button>Changer les informations</button></a>
+        <br><br>
+
+        <button onclick = "demande()"> Demander une intervention </button>
+        <br><br>
+
+        <a href = "logIntervention.html">
+        <button> Enregistrer des travaux </button></a>
+        <br><br>
+
+        <button onclick = "getInfoAppareil()">Récupérer informations</button></a>
+        
+        <script type="text/javascript">            
+            var contractAddress = '0xDFf05A5D3c2e7680757e35487286378EF95bc59E'; //Adresse contrat déployé
+            var account = "0x542b817700C2A772E0DE966673fF6B5D39734677" ; //Adresse compte metamask
+
+            async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+          
+            async function loadContract() {
+                return await new window.web3.eth.Contract(ABI, contractAddress);
+            }
+
+
+            async function load() {
+                await loadWeb3();
+                window.contract = await loadContract();
+
+            }
+
+            load();
+
+            async function demande(){
+                console.log("Changing status to 0");
+                const status = await window.contract.methods.askIntervention().send({from: account});
+            }
+
+            async function getInfoAppareil() {
+
+                const cat1 = await window.contract.methods.categorie().call()
+                const a_type1 = await window.contract.methods.a_type().call()
+                const marque1 = await window.contract.methods.brand().call()
+                const ref1 = await window.contract.methods.refer().call()
+                const nb_serie1 = await window.contract.methods.serial_n().call()
+                document.getElementById("categorie").innerHTML = cat1;
+                document.getElementById("a_type").innerHTML = a_type1;
+                document.getElementById("marque").innerHTML = marque1;
+                document.getElementById("ref").innerHTML = ref1;
+                document.getElementById("nb_serie").innerHTML = nb_serie1;
+            }
+
+        </script>
+    </body>
+
+</html>
