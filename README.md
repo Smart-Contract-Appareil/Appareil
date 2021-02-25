@@ -8,6 +8,10 @@ changeInfo.html -> ajout ou modification des informations de l'appareil
 
 
 
+
+
+
+
 AVEC FRONT :
 
 deployContract.html -> rentrer les informations de l'appareil
