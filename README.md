@@ -14,3 +14,4 @@ deployContract.html -> rentrer les informations de l'appareil
 
 infoContract.html -> affiche les informations de l'appareil
 
+
