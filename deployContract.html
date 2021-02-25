@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Nouvel appareil</title>
+    <link rel="stylesheet" href="style_deployContract.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+    <script type="module" src="bytecode.js"></script>
+
+
+  
+    </head>
+    
+    <body>
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2>My Repair</h2>
+                <ul>
+                    <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                    <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                    <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>
+                    
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Ajout d'un nouvel appareil</div> 
+
+                <div class="formulaire">
+                    <form>
+                        <table>
+                            <div>
+                                Catégorie d'appareil : 
+                                <select name="Categorie" id = "cat_select" class = "custom-select" required>
+                                    <option value="">--Choisissez une catégorie--</option>
+                                    <option value="Froid">Froid</option>
+                                    <option value="Chaud">Chaud</option>
+                                    <option value="Climatisation">Climatisation</option>
+                                </select>
+                            </div>
+                            <br></br>
+                            <div>
+                                Type d'appareil : 
+                            <select name="Type" id = "type_select" class = "custom-select" required>
+                                <option value="">--Choisissez un type d'appareil--</option>
+                                <option value="Armoire à température négative">Armoire à température négative</option>
+                                <option value="Armoire à température positive">Armoire à température positive</option>
+                                <option value="Cellule de refroidissement">Cellule de refroidissement</option>
+                                <option value="Grill">Grill</option>
+                                <option value="Plaques">Plaques</option>
+                                <option value="Four">Four</option>
+                                <option value="Chauffe assiettes">Chauffe assiettes</option>
+                                <option value="Bain Marie">Bain Marie</option>
+                                <option value="Ventilateur">Ventilateur</option>
+                            </select>
+                            </div>
+                            <br></br>
+                            <div>
+                                Marque : 
+                                <input type="text" id="marque" required> </input>
+                            </div>
+                            <br></br>
+                            <div>
+                                Référence : 
+                                <input type="text" id="ref" required> </input>
+                            </div>
+                            <br></br>
+                            <div>
+                                N° de série : 
+                                <input type="text" id="n_serie" required> </input>
+                            </div>
+                        </table>
+                    </form>
+                    <br><br><br><br>
+                    <button onclick = "setInfoAppareil()">Enregistrer les informations</button>
+
+                </form>
+                </div>
+
+            </div>
+        
+            <script type="text/javascript">
+                var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+                var account = "0x542b817700C2A772E0DE966673fF6B5D39734677"; //Adresse compte metamask
+        
+                async function loadWeb3() {
+                        if (window.ethereum) {
+                            window.web3 = new Web3(window.ethereum);
+                            window.ethereum.enable();
+                        }
+                    }    
+                    
+                async function loadContract() {
+                        return await new window.web3.eth.Contract(ABI, contractAddress);
+                    }
+        
+                async function load() {
+                    await loadWeb3();
+                    window.contract = await loadContract();
+                }
+        
+                load();
+                async function setInfoAppareil() {
+
+                    const cat = document.getElementById('cat_select').value;
+                    const a_type = document.getElementById('type_select').value;
+                    const brand = document.getElementById('marque').value;
+                    const ref = document.getElementById('ref').value;
+                    const serial_n = document.getElementById('n_serie').value;
+                     
+                    console.log("cat =" + cat + ", a_type = " + a_type + ", brand= "+ brand +" ,ref = "+ ref + " ,serial_n = "+ serial_n);
+                    const Appareil = await window.contract.methods.setAppareil(cat,a_type,brand,ref,serial_n).send({from: account});
+                }
+        
+                
+            </script>
+    
+
+
+
+    
+    </body>
+</html>
