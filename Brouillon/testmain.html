@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Ethereum connexion</title>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script language="javascript" type="text/javascript" src="abi_message.js"></script>
+
+  
+    </head>
+
+    <body>
+        <script>
+          /*
+          const web3 = new Web3("https://ropsten.infura.io/v3/058e11d6dc1346f089861ed1c87ce6b8")
+          web3.eth.getBlockNumber(function (error, result) {
+            console.log(result)
+          })
+          async function getBlockNumber() {
+            const latestBlockNumber = await web3.eth.getBlockNumber()
+            console.log(latestBlockNumber)
+            return latestBlockNumber
+          
+          getBlockNumber()
+          if (window.ethereum != null) {
+            state.web3 = new Web3(window.ethereum)
+            try {
+              // Request account access if needed
+              await window.ethereum.enable()
+              // Acccounts now exposed
+            } 
+            catch (error) {
+              // User denied account access...
+            }
+          }
+        }
+        var contract = new web3.eth.Contract(messageABI, '0xcC698d2328f1954B0600963aF881F21f05A57d4E');
+       
+        contract.voirMessage(function(error, result){
+         if(!error){
+           console.log(result);
+           }
+        else
+          console.error(error);
+        });
+        */
+        </script>
+
+
+
+
+        <script>
+
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            // set the provider you want from Web3.providers
+            web3 = new Web3(new Web3.providers.HttpProvider("https://ropsten.infura.io/v3/058e11d6dc1346f089861ed1c87ce6b8"));
+        }
+
+
+        // Previous if/else statement removed for brevity
+        web3.eth.defaultAccount = web3.eth.accounts[0];
+
+        var contract = new web3.eth.Contract(messageABI, '0xcC698d2328f1954B0600963aF881F21f05A57d4E');
+        console.log(contract);
+
+
+      
+        </script>
+    
+    </body>
+</html>
