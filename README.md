@@ -1,17 +1,15 @@
 # Appareil
 
-TEST :
 
-test.html -> affiche les informations de l'appareil 
+pageAccueil.html : Page d'accueil du site
 
-changeInfo.html -> ajout ou modification des informations de l'appareil
+deployContract.html : Formulaire pour rentrer les informations de l'appareil dans la blockchain
 
---------------------------------------------------------------------------
+infoContract.html : Affiche les dernières informations de l'appareil, bouton pour demande d'intervention et pour rentrer les travaux d'intervention
 
-AVEC FRONT :
+logMaintenance.html : Rentrer les travaux de maintenance ( affiche cette page en cliquant sur le bouton de travaux d'intervention si statut = 1)
 
-deployContract.html avec style_deployContract.css -> rentrer les informations de l'appareil
+logReparation.html : Rentrer les travaux de réparation ( affiche cette page en cliquant sur le bouton de travaux d'intervention si statut = 0)
 
-infoContract.html avec style_infoContract.css-> affiche les informations de l'appareil
 
 
