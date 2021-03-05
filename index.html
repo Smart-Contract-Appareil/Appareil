@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mes contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_infoContrat.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+  
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+              <h2>My Repair</h2>
+              <ul>
+                  <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                  <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                  <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>
+                  
+                
+                
+              </ul> 
+          </div>
+          <div class="main_content">
+              <div class="header">Mes contrats</div>  
+              <div class="app">
+                <h1>Appareil XXXX</h1>
+                <div class="info">
+                    <h2><i class="fas fa-info" style="color:black" onclick="getInfoAppareil()"></i> Informations de l'appareil</h2>
+                    <p>
+                      Numéro du contrat : <span id="nb_contract">Loading...</span> <br></br>
+                      Catégorie : <span id="categorie">Loading...</span> <br></br>
+                      Type : <span id="a_type">Loading...</span> <br></br>
+                      Marque : <span id="marque">Loading...</span> <br></br>
+                      Référence : <span id="ref">Loading...</span> <br></br>
+                      N° de série : <span id="nb_serie">Loading...</span> <br></br>
+                      Statut: <span id="statut">Loading...</span> <br></br>
+              
+                    </p>
+                    <button onclick="document.location = 'dmdInterv.html'" class="button1">Demande d'intervention</button>
+                    
+                </div>
+
+                <div class="hist">
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Historique de l'appareil</h2>
+                    <table>
+                      <tr>
+                        <th>Date</th>
+                        <th>Numéro de la demande</th>
+                        <th>Type d'intervention</th>
+                        <th>Commentaires</th>
+                      </tr>
+                      <tr>
+                        <td>01/12/2020</td>
+                        <td>25357</td>
+                        <td>Maintenance</td>
+                        <td>Rien d'anormal</td>
+                      </tr>
+                      <tr>
+                        <td>15/09/2019</td>
+                        <td>89624</td>
+                        <td>Réparation</td>
+                        <td>N/A</td>
+                      </tr>
+                    </table>
+
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <script type="text/javascript">
+        class transact{
+
+            txhash;
+            blockn;
+            time_date;
+            commentaire = ""; 
+            constructor(txhash,blockn,time_date,commentaire){
+                this.txhash = txhash;
+                this.blockn = blockn;
+                this.time_date = time_date;
+                this.commentaire = commentaire;
+            }
+
+            get txhash(){
+                return this.txhash;
+            }
+
+            get blockn(){
+                return this.blockn;
+            }
+
+            get time_date(){
+                return this.blotime_dateckn;
+            }
+            
+            get commentaire(){
+                return this.commentaire;
+            }  
+
+            set commentaire(com){
+                this.commentaire.concat(" ;\n"+ com);
+            }
+
+            }
+        var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+        var account = "0x542b817700C2A772E0DE966673fF6B5D39734677"; //Adresse compte metamask
+        var events;
+
+        async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+        }    
+            
+        async function loadContract() {
+                return await new window.web3.eth.Contract(ABI, contractAddress);
+        }
+        
+        async function loadEvents(){
+            var arrayEvents = new Array();
+            await window.contract.events.allEvents(
+            {
+            fromBlock: 0,
+            toBlock: 'latest'
+            }, async(err, event) => {
+            //console.log(err, event)
+            // Met les events filtrés (sans les ajouts d'adresses à la whiteList)
+                if (event.event == "interventionEvent"| event.event == "changeOfStatusEvent"){
+                    if (event.event == "interventionEvent"){ 
+                        arrayEvents.push(
+                            new transact(
+                                event.transactionHash,
+                                (await web3.eth.getTransaction(event.transactionHash)).blockNumber,
+                                new Date((await web3.eth.getBlock((await web3.eth.getTransaction(event.transactionHash)).blockNumber)).timestamp * 1000),
+                                event.returnValues.work_or_reason
+                            )
+                        ); 
+                    }
+                    else{
+                        arrayEvents.push(
+                            new transact(
+                                event.transactionHash,
+                                (await web3.eth.getTransaction(event.transactionHash)).blockNumber,
+                                new Date((await web3.eth.getBlock((await web3.eth.getTransaction(event.transactionHash)).blockNumber)).timestamp * 1000),
+                                "Changement de statut en : "+event.returnValues.newStatus
+                            )
+                        );  
+                    }
+                }
+            });
+
+            console.log(arrayEvents);
+            return arrayEvents;
+        }
+
+        function assembleDuplicateTransactions(arrayEvents){
+           /*
+            console.log(arrayEvents);
+            //console.log(arrayEvents.length);
+            if(arrayEvents == null)
+                return;
+            uniqueEvents = new Array();
+            for(i=0;i<arrayEvents.length;i++){
+                console.log("txhash : " + arrayEvents[i].txhash() );
+                if(uniqueEvents.length == 0 | arrayEvents[i].txhash() != uniqueEvents[uniqueEvents.length-1].txhash()){
+                    console.log("Unique txhash : " + arrayEvents[i].txhash() );
+                    uniqueEvents.push(arrayEvents[i]);
+                }
+                else{
+                    //uniqueEvents[uniqueEvents.length-1].commentaire(arrayEvents[i].commentaire);
+                    console.log("Doublon detecté : " + arrayEvents[i].txhash());
+                }
+            } 
+            console.log(uniqueEvents);
+            resolve(uniqueEvents);
+            */
+            return new Promise(resolve => {
+                setTimeout(() => {
+                    if(arrayEvents == null)
+                        return;
+                    uniqueEvents = new Array();
+                    for(i=0;i<arrayEvents.length;i++){
+                        console.log("txhash : " + arrayEvents[i].txhash() );
+                        if(uniqueEvents.length == 0 | arrayEvents[i].txhash() != uniqueEvents[uniqueEvents.length-1].txhash()){
+                            //console.log("Unique txhash : " + arrayEvents[i].txhash() );
+                            uniqueEvents.push(arrayEvents[i]);
+                        }
+                        else{
+                            uniqueEvents[uniqueEvents.length-1].commentaire(arrayEvents[i].commentaire);
+                            //console.log("Doublon detecté : " + arrayEvents[i].txhash());
+                        }
+                    } 
+                    console.log(uniqueEvents);
+                    resolve(uniqueEvents);
+                }, 2000);
+            });
+        }
+        
+
+        
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            getInfoAppareil();
+            // Récupère tous les events
+            events = loadEvents();
+            console.log(await assembleDuplicateTransactions(events));
+            //console.log(uniqueEv);
+        }
+
+        load();
+        
+        
+        async function getInfoAppareil() {
+            document.getElementById("categorie").innerHTML = await window.contract.methods.categorie().call()
+            document.getElementById("a_type").innerHTML = await window.contract.methods.a_type().call()
+            document.getElementById("marque").innerHTML = await window.contract.methods.brand().call()
+            document.getElementById("ref").innerHTML = await window.contract.methods.refer().call()
+            document.getElementById("nb_serie").innerHTML = await window.contract.methods.serial_n().call()
+            document.getElementById("statut").innerHTML = await window.contract.methods.statut().call()
+            document.getElementById("nb_contract").innerHTML = contractAddress;
+        }
+
+        
+      </script>
+
+  </body>
+</html>
