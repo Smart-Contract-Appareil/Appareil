@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mes contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_infoContrat.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+  
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+              <h2>My Repair</h2>
+              <ul>
+                  <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                  <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                  <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>
+                  
+                
+                
+              </ul> 
+          </div>
+          <div class="main_content">
+              <div class="header">Mes contrats</div>  
+              <div class="app">
+                <h1>Appareil XXXX</h1>
+                <div class="info">
+                    <h2><i class="fas fa-info" style="color:black" onclick="getInfoAppareil()"></i> Informations de l'appareil</h2>
+                    <p>
+                      Numéro du contrat : <span id="nb_contract">Loading...</span> <br></br>
+                      Catégorie : <span id="categorie">Loading...</span> <br></br>
+                      Type : <span id="a_type">Loading...</span> <br></br>
+                      Marque : <span id="marque">Loading...</span> <br></br>
+                      Référence : <span id="ref">Loading...</span> <br></br>
+                      N° de série : <span id="nb_serie">Loading...</span> <br></br>
+                      Statut: <span id="statut">Loading...</span> <br></br>
+              
+                    </p>
+                    <button onclick="document.location = 'dmdInterv.html'" class="button1">Demande d'intervention</button>
+                    
+                </div>
+
+                <div class="hist">
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Historique de l'appareil</h2>
+                    <table>
+                      <tr>
+                        <th>Date</th>
+                        <th>Numéro de la demande</th>
+                        <th>Type d'intervention</th>
+                        <th>Commentaires</th>
+                      </tr>
+                      <tr>
+                        <td>01/12/2020</td>
+                        <td>25357</td>
+                        <td>Maintenance</td>
+                        <td>Rien d'anormal</td>
+                      </tr>
+                      <tr>
+                        <td>15/09/2019</td>
+                        <td>89624</td>
+                        <td>Réparation</td>
+                        <td>N/A</td>
+                      </tr>
+                    </table>
+
+              </div>
+            </div>
+          </div>
+      </div>
+
+      <script type="text/javascript">
+        var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+        var account = "0x542b817700C2A772E0DE966673fF6B5D39734677"; //Adresse compte metamask
+
+        async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+            
+        async function loadContract() {
+                return await new window.web3.eth.Contract(ABI, contractAddress);
+            }
+
+            async function loadEvents(){
+            var arrayEvents = new Array();
+            var arrayTxHash = new Array();
+            var arrayTxBlockN = new Array();
+            var arrayTxBlockTime = new Array();
+            var transact;
+            var blockN;
+            var time;
+            var tmstmp;
+            await window.contract.events.allEvents(
+            {
+            fromBlock: 0,
+            toBlock: 'latest'
+            }, async(err, event) => {
+            console.log(err, event)
+            // Met les events filtrés (sans les ajouts d'adresses à la whiteList)
+            if (event.event == "interventionEvent"| event.event == "changeOfStatusEvent"){
+                arrayEvents.push(event)
+                if( (arrayTxHash.length == 0) | (event.transactionHash != arrayTxHash[arrayTxHash.length - 1])) {
+                    arrayTxHash.push(event.transactionHash);
+                    transact = await web3.eth.getTransaction(event.transactionHash);
+                    blockN = transact.blockNumber;
+                    arrayTxBlockN.push(blockN);
+                    time = await web3.eth.getBlock(blockN);
+                    tmstmp = time.timestamp;
+                    arrayTxBlockTime.push(tmstmp);
+                }
+            }
+            });
+            
+            arrayTxBlockN.sort();
+            arrayTxBlockTime.sort();
+            convertTimeStamp(arrayTxBlockTime);
+            console.log(arrayTxHash);
+            console.log(arrayTxBlockN);
+            //console.log(arrayTxBlockTime);
+            //console.log(arrayTxBlockN);
+            //console.log(arrayTxBlockTime);
+            
+            //await loadTransactions(arrayTxHash);
+            return arrayEvents;
+        }
+
+        function convertTimeStamp(array){
+            for(var i =0 ; i<array.length;i++){
+                array[i]= new Date(array[i]*1000);
+            }
+            console.log(array);
+        }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            getInfoAppareil();
+            // Récupère tous les events
+            arrayEvents = await loadEvents();
+            //await loadTransactions();
+            //Récupère les transactions
+            //call la fonction pour les transactions
+            console.log(arrayEvents);
+        }
+
+        async function loadTransactions(arrayTx){
+            var transact;
+            var blockN;
+            var time;
+            var arrayBlockN = new Array();
+            var arrayBlockTime = new Array();
+            for(var tx in arrayTx){
+                console.log(tx);
+                transact = await web3.eth.getTransaction(tx);
+                blockN = transact.blockNumber;
+                console.log(blockN);
+                arrayBlockN.push(blockN);
+                //time = await web3.eth.getBlock(blockN).timestamp;
+                //arrayBlockTime.push(time);
+            }    
+ 
+            console.log(arrayBlockN);
+            //console.log(arrayBlockTime);
+        }
+
+        /*
+        async function load() {
+            var arrayEvents = new Array();
+            await loadWeb3();
+            window.contract = await loadContract();
+            getInfoAppareil();
+            // Récupère tous les logs
+            await window.contract.events.allEvents(
+                {
+                fromBlock: 0,
+                toBlock: 'latest'
+                }, (err, event) => {
+                console.log(err, event)
+                // Met les events filtrés (sans les ajouts d'adresses à la whiteList)
+                if (event.event == "interventionEvent"| event.event == "changeOfStatusEvent"){
+                  arrayEvents.push(event)
+                }
+                });
+            console.log(arrayEvents);
+        }*/
+        
+        load();
+        
+        async function getInfoAppareil() {
+
+          const cat1 = await window.contract.methods.categorie().call()
+          const a_type1 = await window.contract.methods.a_type().call()
+          const marque1 = await window.contract.methods.brand().call()
+          const ref1 = await window.contract.methods.refer().call()
+          const nb_serie1 = await window.contract.methods.serial_n().call()
+          const sta = await window.contract.methods.statut().call()
+          document.getElementById("categorie").innerHTML = cat1;
+          document.getElementById("a_type").innerHTML = a_type1;
+          document.getElementById("marque").innerHTML = marque1;
+          document.getElementById("ref").innerHTML = ref1;
+          document.getElementById("nb_serie").innerHTML = nb_serie1;
+          document.getElementById("statut").innerHTML = sta;
+
+          document.getElementById("nb_contract").innerHTML = contractAddress;
+          
+        
+        }
+
+      </script>
+
+  </body>
+</html>
