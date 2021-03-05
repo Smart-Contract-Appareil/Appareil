@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mes contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_logReparation.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+  
+
+    <body onload="infoInterv()">
+      <div class="wrapper">
+          <div class="sidebar">
+              <h2><i class="fas fa-tools"></i> My Repair</h2>
+              <ul>
+                  <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                  <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                  <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>          
+              </ul> 
+          </div>
+          <div class="main_content">
+              <div class="header">Mes contrats</div>  
+              <div class="app">
+                <h1>Appareil XXXX</h1>
+                <div class="info">
+                    <h2><i class="fas fa-toolbox" style="color:black"></i> Intervention : Réparation</h2>
+                    
+                    <p>
+                        Numéro de contrat : <span id="num1">Loading...</span><br>
+                        Numéro d'intervention : <span id="num2">Loading...</span><br>
+                        Statut : <span id="statut">Loading...</span>
+                    </p>
+
+                    <form> 
+                        <fieldset>                     
+                          <legend><b> L'appareil est-il réparé ?</b></legend>
+                            <input type="radio" id="oui"
+                             name="radios" value="oui" checked>
+                            <label for="oui">Oui</label>
+            
+                            <input type="radio" id="non"
+                             name="radios" value="non">
+                            <label for="non">Non</label>        
+                    
+                        </fieldset> 
+                    </form>
+            
+                      <form id="travaux">
+                        <fieldset>
+                          <legend><b> Quels sont les travaux qui ont été faits ?</b></legend>
+                          <div>
+                            <input id="Travail1" type="checkbox" name="Travail1" value="1"/><label for="Travail1"> Travail 1</label></td><br>
+                            <input id="Travail2" type="checkbox" name="Travail2" value="2"/><label for="Travail2"> Travail 2</label></td><br>
+                            <input id="Travail3" type="checkbox" name="Travail3" value="3"/><label for="Travail3"> Travail 3</label></td><br>
+                            <input id="Travail4" type="checkbox" name="Travail4" value="4"/><label for="Travail4"> Travail 4</label></td><br>
+                            <input id="Travail5" type="checkbox" name="Travail5" value="5"/><label for="Travail5"> Travail 5</label></td><br>
+                            <input id="Travail6" type="checkbox" name="Travail6" value="6"/><label for="Travail6"> Travail 6</label></td><br>           
+                         </div>
+                        </fieldset><br>
+                        <input type = "button" value = "Enregistrer" class="button1" onclick = "setInfoIntervention1()">
+                      </form>
+            
+                      <form id="raisons">
+                        <fieldset>
+                          <legend><b>Quelles-en sont les raisons ?</b></legend>
+                          <div>
+                            <input id="Raison1" type="checkbox" name="Raison1" value="1"/><label for="Raison1"> Raison 1</label></td><br>
+                            <input id="Raison2" type="checkbox" name="Raison2" value="2"/><label for="Raison2"> Raison 2</label></td><br>
+                            <input id="Raison3" type="checkbox" name="Raison3" value="3"/><label for="Raison3"> Raison 3</label></td><br>
+                            <input id="Raison4" type="checkbox" name="Raison4" value="4"/><label for="Raison4"> Raison 4</label></td><br>
+                            <input id="Raison5" type="checkbox" name="Raison5" value="5"/><label for="Raison5"> Raison 5</label></td><br>
+                            <input id="Raison6" type="checkbox" name="Raison6" value="6"/><label for="Raison6"> Raison 6</label></td><br>
+                         </div>
+                        </fieldset><br>
+                        <input type = "button" value = "Enregistrer" class="button2" onclick = "setInfoIntervention2()">
+                      </form>
+
+
+      <script type="text/javascript">
+
+        //Connexion metamask
+        var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+        var account = "0x542b817700C2A772E0DE966673fF6B5D39734677"; //Adresse compte metamask
+
+        async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+            
+        async function loadContract() {
+                return await new window.web3.eth.Contract(ABI, contractAddress);
+            }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+        }
+
+        load();
+
+        // Récupérer et afficher numéro contrat, intervention et statut
+        async function infoInterv(){
+            document.getElementById("num1").innerHTML = contractAddress;
+            const statut = await window.contract.methods.statut().call()
+            document.getElementById("statut").innerHTML = statut;
+        }
+
+        // Si oui l'appareil est réparé on affiche les travaux, si non on affiche les raisons
+            var radios = document.getElementsByName("radios");
+            var travaux =  document.getElementById("travaux");
+            var raisons =  document.getElementById("raisons");
+            travaux.style.display = 'block';   // show
+            raisons.style.display = 'none';// hide
+            for(var i = 0; i < radios.length; i++) {
+                radios[i].onclick = function() {
+                    var val = this.value;
+                    if(val == 'oui'){
+                        travaux.style.display = 'block';
+                        raisons.style.display = 'none';
+                    }
+                    else if(val == 'non'){
+                        travaux.style.display = 'none';
+                        raisons.style.display = 'block';
+                    }    
+            
+                }
+            }
+
+
+        // L'appareil est réparé : rentrer les travaux faits 
+            async function setInfoIntervention1 (){
+
+                var travaux_selected = new Array(); //Création d'une Array
+                var travaux = document.getElementById("travaux"); //Référence à la table events
+                var chk1 = travaux.getElementsByTagName("input"); //Référence à tous les checkboxes de la table events
+
+                //Pousser toutes les checkboxes sélectionnées dans l'Array
+                for (var i = 0; i < chk1.length; i++) {
+                    if (chk1[i].checked) {
+                        travaux_selected.push(chk1[i].name);
+                    }
+                }
+                if (travaux_selected.length > 0) {
+                console.log("Travaux effectués : " + travaux_selected);
+                const Appareil1 = await window.contract.methods.logIntervention(1,travaux_selected).send({from:account});
+                }
+            }
+
+        // L'appareil n'est pas réparé : rentrer les raisons
+            async function setInfoIntervention2 (){
+
+                var raisons_selected = new Array(); //Création d'une Array
+                var raisons = document.getElementById("raisons"); //Référence à la table events
+                var chk2 = raisons.getElementsByTagName("input"); //Référence à tous les checkboxes de la table events
+
+                //Pousser toutes les checkboxes sélectionnées dans l'Array
+                for (var i = 0; i < chk2.length; i++) {
+                    if (chk2[i].checked) {
+                        raisons_selected.push(chk2[i].name);
+                    }
+                }
+                if (travaux_selected.length > 0) {
+                console.log("Raisons appareil encore défectueux : " + raisons_selected);
+                const Appareil2 = await window.contract.methods.logIntervention(0,raisons_selected).send({from:account});
+                }
+            }         
+
+
+
+      </script>
+
+  </body>
+</html>

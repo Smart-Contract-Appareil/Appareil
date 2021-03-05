@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mes contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_logInterv.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+  
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+              <h2><i class="fas fa-tools"></i> My Repair</h2>
+              <ul>
+                  <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                  <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                  <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>          
+              </ul> 
+          </div>
+          <div class="main_content">
+              <div class="header">Mes contrats</div>  
+              <div class="app">
+                <h1>Appareil XXXX</h1>
+                <div class="info">
+                    <h2><i class="fas fa-toolbox" style="color:black"></i> Les travaux d'intervention</h2>
+                    
+                    <p>
+                        Numéro de contrat : <span id="num1" onclick="infoInterv()">Loading...</span><br>
+                        Numéro d'intervention : <span id="num2">Loading...</span><br>
+                        <table id="events">
+                            <tr>
+                                <td><input id="travail1" type="checkbox" name="travail1" value="1"/><label for="travail1"> Travail 1</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="travail2" type="checkbox" name="travail2" value="2"/><label for="travail2"> Travail 2</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="travail3" type="checkbox" name="travail3" value="3"/><label for="travail3"> Travail 3</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="travail4" type="checkbox" name="travail4" value="4"/><label for="travail4"> Travail 4</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="maintenance1" type="checkbox" name="maintenance1" value="5"/><label for="maintenance1"> Maintenance 1</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="maintenance2" type="checkbox" name="maintenance2" value="6"/><label for="maintenance2"> Maintenance 2</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="maintenance3" type="checkbox" name="maintenance3" value="7"/><label for="maintenance3"> Maintenance 3</label></td>
+                            </tr>
+                            <tr>
+                                <td><input id="maintenance4" type="checkbox" name="maintenance4" value="8"/><label for="maintenance4"> Maintenance 4</label></td>
+                            </tr>
+                        </table>
+                        <br />
+                        <input type = "button" value = "Enregistrer les informations de l'intervention" class="button1" onclick = "setInfoIntervention()" />
+              
+                    </p>
+                    
+                </div>
+
+      <script type="text/javascript">
+        var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+        var account = "0x542b817700C2A772E0DE966673fF6B5D39734677"; //Adresse compte metamask
+
+        async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+            
+        async function loadContract() {
+                return await new window.web3.eth.Contract(ABI, contractAddress);
+            }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+        }
+
+        load();
+
+        function infoInterv(){
+            document.getElementById("num1").innerHTML = contractAddress;
+        }
+
+        //Rentrer les travaux faits après l'intervention de réparation
+        async function setInfoIntervention (){
+
+            var events_selected = new Array(); //Création d'une Array
+            var events = document.getElementById("events"); //Référence à la table events
+            var chks = events.getElementsByTagName("input"); //Référence à tous les checkboxes de la table events
+
+            //Pousser toutes les checkboxes sélectionnées dans l'Array
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].checked) {
+                    events_selected.push(chks[i].name);
+                }
+            }
+            if (events_selected.length > 0) {
+            console.log("Travaux effectués : " + events_selected);
+            const Appareil1 = await window.contract.methods.logIntervention(1,events_selected).send({from:account});
+            }
+        }
+
+      </script>
+
+  </body>
+</html>
