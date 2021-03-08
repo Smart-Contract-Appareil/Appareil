@@ -1,10 +1,11 @@
 pragma experimental ABIEncoderV2;
 pragma solidity ^0.6.12;
+//SPDX-License-Identifier: MIT
 
 import "./Whitelist.sol";
 import "./Ownable.sol";
 
-contract Appareil is Whitelist{
+contract Appareils is Whitelist{
     
     //Model an equipment 
     string categorie;
