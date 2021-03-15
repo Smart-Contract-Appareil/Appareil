@@ -14,6 +14,29 @@ contract Appareil is Whitelist{
     string  public serial_n;
     int  public statut; // 1 = en marche, 0 = HS , -1 = définitivement HS
     
+    //General data of the document
+    struct DataPJ{
+        uint256 id;
+        string type_doc;
+        uint date;
+        string company;
+        string intervenant;
+        string prix_tot;
+    }
+    
+    //List of item of the document
+    struct ItemPJ{
+        uint256 id;
+        string lib_1; string lib_2; string lib_3; string lib_4; string lib_5;
+        string dta_1; string dta_2; string dta_3; string dta_4; string dta_5;
+    }
+    
+    // Store & Fetch sales quote
+    mapping(uint => ItemPJ) public itemPJ;
+    mapping(uint => DataPJ) public dataPJ;
+    
+    //Count number of sales quote
+    uint256 public pjCount;    
     
     //Intervention event
     event interventionEvent(string work_or_reason);
@@ -81,4 +104,18 @@ contract Appareil is Whitelist{
          revert("newStatus must be -1 (dead), 0 (out of order) or 1 (working)");  
         }
     }
+    
+    //ne pas oublier de rajouter onlyTechnicians
+    //l'emit sert au tableau pour le client
+    function setDataPJ (string memory type_doc, string memory company, string memory intervenant, string memory prix_tot) public onlyTechnicians
+    {
+        pjCount ++;
+        dataPJ[pjCount] = DataPJ(pjCount, type_doc, now, company, intervenant, prix_tot);
+    }
+    
+    function setItemPJ (string memory lib_1, string memory lib_2, string memory lib_3, string memory lib_4, string memory lib_5, string memory dta_1, string memory dta_2, string memory dta_3, string memory dta_4, string memory dta_5) public onlyTechnicians
+    {
+        itemPJ[pjCount] = ItemPJ(pjCount, lib_1, lib_2, lib_3, lib_4, lib_5, dta_1, dta_2, dta_3, dta_4, dta_5);
+    }
+    
 }
