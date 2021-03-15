@@ -4,7 +4,10 @@ pragma solidity ^0.6.12;
 import "./Whitelist.sol";
 import "./Ownable.sol";
 
-contract Appareil is Whitelist{
+
+// is Traceability au lieu de is Whitelist à mettre pour en faire " la classe mère "
+// Penser au multi client de la white list du coup 
+contract Appareil is Whitelist {
     
     //Model an equipment 
     string  public categorie;
@@ -14,17 +17,53 @@ contract Appareil is Whitelist{
     string  public serial_n;
     int  public statut; // 1 = en marche, 0 = HS , -1 = définitivement HS
     
+    //General data of the document
+    struct DataPJ{
+        uint256 id;
+        string type_doc;
+        uint date;
+        string company;
+        string intervenant;
+        string prix_tot;
+    }
+    
+    //List of item of the document
+    struct ItemPJ{
+        uint256 id;
+        string lib_1; string lib_2; string lib_3; string lib_4; string lib_5;
+        string dta_1; string dta_2; string dta_3; string dta_4; string dta_5;
+    }
+    
+    // Store & Fetch sales quote
+    mapping(uint => ItemPJ) public itemPJ;
+    mapping(uint => DataPJ) public dataPJ;
+    
+    //Count number of sales quote
+    uint256 public pjCount;    
+    
     
     //Intervention event
     event interventionEvent(string work_or_reason);
     //Change of equipment status event
     event changeOfStatusEvent(int newStatus);
+    //Changement de d'informations de l'appareil
+    event changeInfoEvent(string field, string oldvalue , string newvalue);
     
-    //Contant strings for event use 
+    
+    
+    //Constant strings for event use 
     string rep = "Réparation";
     string mtn = "Maintenance" ;
     string inst = "Installation";
-
+    string edit = "Modification";
+    
+    //string arrow = " --> ";
+    string cat_str = "Catégorie : ";
+    string ap_type_str = "Type d'appareil : ";
+    string marque_str = "Marque : ";
+    string ref_str = "Référence : ";
+    string nb_serie_str = "Numéro de série : ";
+    
     
     /**
    * @dev set the device/equipment key informations and status to working (=1)
@@ -35,13 +74,33 @@ contract Appareil is Whitelist{
    * @param nb_serie serial number 
    */
     function setAppareil (string memory cat, string memory ap_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
+        emit interventionEvent(inst);
+        emit interventionEvent(cat);
+        emit interventionEvent(ap_type);
+        emit interventionEvent(marque);
+        emit interventionEvent(ref);
+        emit interventionEvent(nb_serie);
         categorie = cat;
         a_type = ap_type;
         brand = marque;
         refer = ref;
         serial_n = nb_serie;
         statut = 1;
-        emit interventionEvent(inst);
+        
+    }
+    
+    function editAppareil (string memory cat, string memory ap_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
+        emit interventionEvent(edit);
+        if(keccak256(abi.encodePacked(categorie)) != keccak256(abi.encodePacked(cat))){emit changeInfoEvent(cat_str,categorie,cat);}
+        if(keccak256(abi.encodePacked(a_type)) != keccak256(abi.encodePacked((ap_type)))){emit changeInfoEvent(ap_type_str,a_type,ap_type);}
+        if(keccak256(abi.encodePacked(brand)) != keccak256(abi.encodePacked((marque)))){emit changeInfoEvent(marque_str,brand,marque);}
+        if(keccak256(abi.encodePacked(refer)) != keccak256(abi.encodePacked((ref)))){emit changeInfoEvent(ref_str,refer,ref);}
+        if(keccak256(abi.encodePacked(serial_n)) != keccak256(abi.encodePacked((nb_serie)))){emit changeInfoEvent(nb_serie_str,serial_n,nb_serie);}
+        categorie = cat;
+        a_type = ap_type;
+        brand = marque;
+        refer = ref;
+        serial_n = nb_serie;
     }
     
     /**
@@ -81,4 +140,17 @@ contract Appareil is Whitelist{
          revert("newStatus must be -1 (dead), 0 (out of order) or 1 (working)");  
         }
     }
+    
+    //l'emit sert au tableau pour le client
+    function setDataPJ (string memory type_doc, string memory company, string memory intervenant, string memory prix_tot) public onlyTechnicians
+    {
+        pjCount ++;
+        dataPJ[pjCount] = DataPJ(pjCount, type_doc, now, company, intervenant, prix_tot);
+    }
+    
+    function setItemPJ (string memory lib_1, string memory lib_2, string memory lib_3, string memory lib_4, string memory lib_5, string memory dta_1, string memory dta_2, string memory dta_3, string memory dta_4, string memory dta_5) public onlyTechnicians
+    {
+        itemPJ[pjCount] = ItemPJ(pjCount, lib_1, lib_2, lib_3, lib_4, lib_5, dta_1, dta_2, dta_3, dta_4, dta_5);
+    }
+    
 }
