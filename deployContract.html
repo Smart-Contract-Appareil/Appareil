@@ -86,9 +86,6 @@
             </div>
         
             <script type="text/javascript">
-                //var contractAddress = "0xbe6EAcD08851b26cdac57CE68938F72491D1918b"; //Adresse contrat déployé
-
-
                 async function loadWeb3() {
                         if (window.ethereum) {
                             window.web3 = new Web3(window.ethereum);
@@ -106,8 +103,7 @@
 
                     console.log(web3.eth.accounts.create());
 
-                    const privateKey1 = new ethereumjs.Buffer.Buffer.from(accounts[0].key, 'hex');
-
+                    const privateKey1 = new ethereumjs.Buffer.Buffer.from("cf55318043c4b42993590bc9594629e8520f6791a31e6c1d1e3e9d318dd8766c", 'hex');
 
                     //deploye contract
                     web3.eth.getTransactionCount(account,(err,txCount)=>{
@@ -116,7 +112,7 @@
                         // create transaction object
                         const txObject = {
                             nonce : web3.utils.toHex(txCount),
-                            gasLimite : web3.utils.toHex(1000000),
+                            gasLimit : "E00",//web3.utils.toHex(1000000),
                             gasPrice : web3.utils.toHex(web3.utils.toWei('10','gwei')),
                             data : data
                         } 
@@ -130,7 +126,11 @@
                         //Broadcast the transaction
                         web3.eth.sendSignedTransaction(raw, (err, txHash)=>{
                             console.log('err:',err,"txHash:",txHash);
+                            console.log(await web3.eth.getTransaction(txHash));
+                            
                         })
+
+                        
                     });
                     //recupération de contractAddress : à recupérer depuis le transactionHash (to:)
                     //window.contract = await loadContract(contractAddress);

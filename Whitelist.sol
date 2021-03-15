@@ -32,7 +32,6 @@ contract Whitelist is Ownable {
     _;
   }
 
-
   /**
    * @dev Throws if called by any account that's not the client.
    */
