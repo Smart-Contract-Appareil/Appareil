@@ -9,8 +9,16 @@ http-server "app_path"
 ```
 TO USE 
 
+Ownable.sol
+TechniciansWL.sol 
+ListClients.sol  //contains deployed TechniciansWL contract address
+ContratsClient.sol //contains deployed TechniciansWL contract address
+Appareil.sol //contains deployed TechniciansWL and ContractClients contracts addresses
+
+--> DON'T FORGET TO CHANGE ADDRESSES IN DEPENDING .sol IF TechniciansWL.sol and/or ContractsClient.sol ARE REDEPLOYED 
+
 test.html
 changeInfo.html
 logIntervention.html
 
-abi.js
+abi2.js
