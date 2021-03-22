@@ -1,13 +1,45 @@
 pragma experimental ABIEncoderV2;
 pragma solidity ^0.6.12;
 
-import "./Whitelist.sol";
+
 import "./Ownable.sol";
+import "./TechniciansWL.sol";
+import "./ContratsClient.sol";
 
 
 // is Traceability au lieu de is Whitelist à mettre pour en faire " la classe mère "
 // Penser au multi client de la white list du coup 
-contract Appareil is Whitelist {
+contract Appareil is Ownable{
+    
+    //Allow to check technicians address from technicians whitelist contract
+    address techniciansWLAddr = 0x96110E5C38E1189c6e28b13C73a34F58f718b226;
+    TechniciansWL techniciansWL = TechniciansWL(techniciansWLAddr);
+  
+   /**
+   * @dev Throws if called by any account that's not a technician's.
+   */
+    modifier onlyTechnicians() {
+        require(techniciansWL.isTechnician(msg.sender));
+        _;
+    }
+    
+    function updateTechniciansWLAddress(address addr) onlyOwner public {
+    techniciansWLAddr = addr;
+   }
+    
+    
+    //Allow to check client identity through wallet 
+    address contractClientAddr;
+    ContratsClient c;
+  
+   /**
+   * @dev Throws if called by any account that's not a technician's.
+   */
+    modifier onlyClient() {
+        require(c.isClient(msg.sender));
+        _;
+    }
+    
     
     //Model an equipment 
     string  public categorie;
@@ -64,6 +96,7 @@ contract Appareil is Whitelist {
     string ref_str = "Référence : ";
     string nb_serie_str = "Numéro de série : ";
     
+
     
     /**
    * @dev set the device/equipment key informations and status to working (=1)
@@ -73,7 +106,7 @@ contract Appareil is Whitelist {
    * @param ref reference of the equipment
    * @param nb_serie serial number 
    */
-    function setAppareil (string memory cat, string memory ap_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
+    function setAppareil (address contratsClientAddr, string memory cat, string memory ap_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
         emit interventionEvent(inst);
         emit interventionEvent(cat);
         emit interventionEvent(ap_type);
@@ -86,6 +119,10 @@ contract Appareil is Whitelist {
         refer = ref;
         serial_n = nb_serie;
         statut = 1;
+        
+        //Update in the client contracts list
+        c = ContratsClient(contratsClientAddr);
+        c.addContract(address(this),categorie, a_type, brand,refer,serial_n);
         
     }
     
@@ -101,6 +138,8 @@ contract Appareil is Whitelist {
         brand = marque;
         refer = ref;
         serial_n = nb_serie;
+        
+        c.updateContract(address(this),categorie, a_type, brand,refer,serial_n);
     }
     
     /**
@@ -110,6 +149,7 @@ contract Appareil is Whitelist {
         if(statut == 1){
             statut = 0;
             emit changeOfStatusEvent(statut);
+            c.updateContractStatus(address(this),statut);
         }
         else{
             revert("Une demande d'intervention a déjà été effectuée / Pas d'appareil existant");
@@ -121,7 +161,7 @@ contract Appareil is Whitelist {
    * @param newStatus status of the equipment after the intervention
    * @param work_or_reason list of work done (reparations/cleaning/piece changing etc.) or reason of reparation impossibility
    */
-    function logIntervention (int newStatus, string[] memory work_or_reason) public onlyTechnicians {
+    function logIntervention (address contratsClientAddr, int newStatus, string[] memory work_or_reason) public onlyTechnicians {
         if (newStatus <= 1 && newStatus >= -1){
             if (statut == 0)
                 emit interventionEvent(rep);
@@ -130,6 +170,7 @@ contract Appareil is Whitelist {
                 
             if(statut != newStatus){
                 statut = newStatus;
+                c.updateContractStatus(address(this),statut);
                 emit changeOfStatusEvent(newStatus);
             }   
             for (uint256 i = 0; i < work_or_reason.length; i++) {
