@@ -17,16 +17,24 @@ contract TechniciansWL is Ownable {
   event TechnicianAddressRemoved(address addr);
 
 
-
-  /**
+ /**
    * @dev Throws if called by any account that's not a technician's.
-   */
+   
   modifier onlyTechnicians() {
     require(technicians[msg.sender]);
     _;
   }
-
-
+*/
+  
+  function isTechnician(address addr) public returns(bool){
+      if(technicians[addr]){
+          return true;
+      }
+      else {
+          return false;
+      }
+  }
+  
   /**
    * @dev add an address to the chosen whitelist
    * @param addr address
@@ -84,6 +92,5 @@ contract TechniciansWL is Ownable {
       }
     }
   }
-
-
+  
 }
