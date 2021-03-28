@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Nouveau client</title>
+    <link rel="stylesheet" href="style_newClient.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+    <script type="module" src="bytecode.js"></script>
+
+
+    </head>
+    
+    <body>
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2><i class="fas fa-tools"></i> My Repair</h2>
+                <ul>
+                    <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                    <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                    <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>
+                    
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Les clients</div>
+                <div class='titre'>
+                    <h2><i class="fas fa-folder-plus" style="color:black"></i> Ajout d'un nouveau client</h2>
+                </div>
+                <div class='formulaire'>
+                    <form>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-building icon"></i>
+                        <input class="input-field" type="text" placeholder="Nom entreprise" name="nameEntrp" required>
+                        </div>
+                    
+                        <div class="input-container">
+                        <i class="fa fa-address-card icon"></i>
+                        <input class="input-field" type="text" placeholder="Adresse postale" name="adressePost" required>
+                        </div>
+                    
+                        <div class="input-container">
+                        <i class="fa fa-map-marker icon"></i>
+                        <input class="input-field" type="text" placeholder="Code postal" name="codePost" required>
+                        </div>
+
+                        <div class="input-container">
+                        <i class="fa fa-map icon"></i>
+                        <input class="input-field" type="text" placeholder="Ville" name="ville" required>
+                        </div>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-at icon"></i>
+                        <input class="input-field" type="email" placeholder="Email" name="email" required>
+                        </div>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-phone icon"></i>
+                        <input class="input-field" type="tel" placeholder="Numéro de téléphone" name="numTel" required>
+                        </div>
+
+                    
+                        <button onclick = "setInfoClient()" class="btn">Enregistrer</button>
+                    </form>
+                </div>
+                <button class="button1"><a href="tabClient.html"><i class="fas fa-arrow-left"></i>&nbsp Retour</button>
+            </div>
+        
+            <script type="text/javascript">
+                var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+                var account = "0x542b817700C2A772E0DE966673fF6B5D39734677"; //Adresse compte metamask
+        
+                async function loadWeb3() {
+                        if (window.ethereum) {
+                            window.web3 = new Web3(window.ethereum);
+                            window.ethereum.enable();
+                        }
+                    }    
+                    
+                async function loadContract() {
+                        return await new window.web3.eth.Contract(ABI, contractAddress);
+                    }
+        
+                async function load() {
+                    await loadWeb3();
+                    window.contract = await loadContract();
+                }
+        
+                load();
+                async function setInfoClient() {
+
+                }
+        
+                
+            </script>
+    
+
+
+
+    
+    </body>
+</html>
