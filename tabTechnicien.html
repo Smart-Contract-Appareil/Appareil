@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Techniciens</title>
+    <link rel="stylesheet" href="style_tabTechnicien.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abiTechniciansWL.js"></script>
+
+    </head>
+    
+    <body onload="createTable()">
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2><i class="fas fa-tools"></i> My Repair</h2>
+                <ul>
+                    <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                    <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                    <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>
+                    
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Techniciens</div>
+                <div class='titre'>
+                    <h2><i class="fas fa-folder-plus" style="color:black"></i> Nouveau technicien</h2>
+                </div>
+                <div class='formulaire'>
+                    <p>
+                        Ajouter un technicien : <input type="button" id="addRow" value="Ajouter" onclick="addRow()" />
+                    </p><br><br>
+                        
+                        <div id="cont"></div>  <!-- the container to add the TABLE -->
+                        
+                        <br><br><p>
+                        <button id="bt" class="button1" onclick="setInfoTech()"><i class="fas fa-save"></i> Valider</button>
+                        </p>
+                        <p id='output'></p>
+                    </form>
+                </div><br><br>
+
+                <div class='titre'>
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Liste des techniciens</h2>
+                </div>
+                <table class ="listeTechnicien">
+                    <thead>
+                        <tr>
+                            <th>Adresse portefeuille</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+
+            </div>
+        
+            <script type="text/javascript">
+                
+            var arrHead = new Array();	// array for header.
+            arrHead = ['', 'Nom', 'Prénom', 'Adresse portefeuille'];
+    
+            // first create TABLE structure with the headers. 
+            function createTable() {
+                var empTable = document.createElement('table');
+                empTable.setAttribute('id', 'empTable'); // table id.
+        
+                var tr = empTable.insertRow(-1);
+                for (var h = 0; h < arrHead.length; h++) {
+                    var th = document.createElement('th'); // create table headers
+                    th.innerHTML = arrHead[h];
+                    tr.appendChild(th);
+                }
+        
+                var div = document.getElementById('cont');
+                div.appendChild(empTable);  // add the TABLE to the container.
+            }
+        
+            // now, add a new to the TABLE.
+            function addRow() {
+                var empTab = document.getElementById('empTable');
+                var rowCnt = empTab.rows.length;   // table row count.
+                var tr = empTab.insertRow(rowCnt); // the table row.
+                tr = empTab.insertRow(rowCnt);
+                for (var c = 0; c < arrHead.length; c++) {
+                    var td = document.createElement('td'); // table definition.
+                    td = tr.insertCell(c);
+                    if (c == 0) {      // the first column.
+                        // add a button in every new row in the first column.
+                        var button = document.createElement('input');
+        
+                        // set input attributes.
+                        button.setAttribute('type', 'button');
+                        button.setAttribute('value', 'Supprimer');
+                        // add button's 'onclick' event.
+                        button.setAttribute('onclick', 'removeRow(this)');
+                        td.appendChild(button);
+                    }
+                    else {
+                        // 2nd, 3rd and 4th column, will have textbox.
+                        var ele = document.createElement('input');
+                        ele.setAttribute('type', 'text');
+                        ele.setAttribute('value', '');
+                        td.appendChild(ele);
+                    }
+                }
+            }
+        
+            // delete TABLE row function.
+            function removeRow(oButton) {
+                var empTab = document.getElementById('empTable');
+                empTab.deleteRow(oButton.parentNode.parentNode.rowIndex); // button -> td -> tr.
+            }
+
+            // function to extract and submit table data.
+            async function setInfoTech() {
+                //Détection automatique du compte
+                var account = await web3.eth.getAccounts();
+                account = account[0];
+
+                // function to extract and submit table data.
+                var doc_tab = document.getElementById('empTable');
+                var tableauFinal = new Array();
+                var noms = new Array();
+                var prenoms = new Array();
+                var adresses = new Array();
+
+                //loop through each row of the table.
+                for (row = 1; row < doc_tab.rows.length - 1; row++) {
+                // loop through each cell in a row.
+                    for (c = 0; c < doc_tab.rows[row].cells.length; c++) {
+                    var element = doc_tab.rows.item(row).cells[c];
+                        if (element.childNodes[0].getAttribute('type') == 'text') {
+                        tableauFinal.push(element.childNodes[0].value);
+                        }
+                    }
+                }
+                for(let i = 0; i < tableauFinal.length; i++){
+                    if(i%3 == 0){
+                        noms.push(tableauFinal[i]);
+                    }
+                    else if(i%3 == 1){
+                        prenoms.push(tableauFinal[i]);
+                    }
+                    else if(i%3 == 2){
+                        adresses.push(tableauFinal[i]);
+                    }
+                }
+                console.log("tableauFinal : ", tableauFinal);
+                console.log(noms);
+                console.log(prenoms)
+                console.log(adresses)
+                window.contract.methods.addAddressesToWhitelist(adresses,noms,prenoms).send({from: account})
+            }
+
+            var techniciansWLAddress = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E"; //Adresse du contrat techniciansWL
+            
+            /*
+            * Etablit la connexion avec Metamask
+            */
+            async function loadWeb3(){
+                if (window.ethereum){
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            } 
+            
+            // Charge le contrat 
+            async function loadContract(){
+                    return await new window.web3.eth.Contract(ABITechniciansWL, techniciansWLAddress);
+            }
+
+            async function load() {
+                var account = await web3.eth.getAccounts();
+                account = account[0];
+                await loadWeb3();
+                window.contract = await loadContract();
+                console.log(window.contract);
+                let techniciansAdresses = await window.contract.methods.getTechnicians().call(function(err,res){
+                    console.log(res);
+                    createTechniciansTable(res);
+                });
+
+                if(window.contract.methods.owner().call() != account){
+                        document.getElementById("bt").disabled = true;
+                    }
+            }
+
+            function createTechnicianRow(address){
+                let tr = document.createElement('tr');
+                const tdAddress = document.createElement('td');
+                tdAddress.innerText = address ;
+                tr.appendChild(tdAddress);
+            
+                var techInfo = window.contract.methods.techniciansInfo(address).call();
+                const tdName = document.createElement('td');
+                tdName.innerText = techInfo.nom;
+                tr.appendChild(tdName);
+
+                const tdSurname = document.createElement('td');
+                tdSurname.innerText = techInfo.prenom;
+                tr.appendChild(tdSurname);
+
+                return tr
+            }
+
+            function createTechniciansTable(addresses){
+                const tbody = document.querySelector('.listeTechnicien tbody');
+                for(let i = 0; i<addresses.length ; i++){
+                    if(addresses[i]!="0x0000000000000000000000000000000000000000"){
+                        var techInfo = window.contract.methods.techniciansInfo(addresses[i]).call(function(err,res){
+                            console.log("res = ");
+                            console.log(res);
+                            let tr = document.createElement('tr');
+                            const tdAddress = document.createElement('td');
+                            tdAddress.innerText = addresses[i] ;
+                            tr.appendChild(tdAddress);
+                            const tdName = document.createElement('td');
+                            tdName.innerText = res.nom;
+                            tr.appendChild(tdName);
+
+                            const tdSurname = document.createElement('td');
+                            tdSurname.innerText = res.prenom;
+                            tr.appendChild(tdSurname);
+
+                            tbody.appendChild(tr);
+                        });
+                    }
+                }
+            }
+                
+            load();
+        
+            </script>
+    
+    </body>
+</html>
