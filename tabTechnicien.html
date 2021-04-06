@@ -61,7 +61,10 @@
             </div>
         
             <script type="text/javascript">
-                
+            //Détection automatique du compte
+            const accounts = await ethereum.request({ method: 'eth_accounts' });
+            account = accounts[0];
+
             var arrHead = new Array();	// array for header.
             arrHead = ['', 'Nom', 'Prénom', 'Adresse portefeuille'];
     
@@ -119,10 +122,6 @@
 
             // function to extract and submit table data.
             async function setInfoTech() {
-                //Détection automatique du compte
-                var account = await web3.eth.getAccounts();
-                account = account[0];
-
                 // function to extract and submit table data.
                 var doc_tab = document.getElementById('empTable');
                 var tableauFinal = new Array();
@@ -172,12 +171,10 @@
             
             // Charge le contrat 
             async function loadContract(){
-                    return await new window.web3.eth.Contract(ABITechniciansWL, techniciansWLAddress);
+                return await new window.web3.eth.Contract(ABITechniciansWL, techniciansWLAddress);
             }
 
-            async function load() {
-                var account = await web3.eth.getAccounts();
-                account = account[0];
+            async function load(){
                 await loadWeb3();
                 window.contract = await loadContract();
                 console.log(window.contract);
@@ -185,16 +182,15 @@
                     console.log(res);
                     createTechniciansTable(res);
                 });
-
                 if(window.contract.methods.owner().call() != account){
-                        document.getElementById("bt").disabled = true;
-                    }
+                    document.getElementById("bt").disabled = true;
+                }
             }
 
             function createTechnicianRow(address){
                 let tr = document.createElement('tr');
                 const tdAddress = document.createElement('td');
-                tdAddress.innerText = address ;
+                tdAddress.innerText = address;
                 tr.appendChild(tdAddress);
             
                 var techInfo = window.contract.methods.techniciansInfo(address).call();
