@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style_infoContrat.css">
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script type="text/javascript" src="abi.js"></script>
+    <script type="text/javascript" src="ABIAppareil.js"></script>
   
 
     <body onload="getInfoAppareil()">
@@ -116,7 +116,7 @@
         * Charge le contrat 
         */
         async function loadContract() {
-                return await new window.web3.eth.Contract(ABI, contractAddress);
+                return await new window.web3.eth.Contract(ABIAppareil, contractAddress);
         }
         
         /*
