@@ -16,6 +16,31 @@ contract ContratsClient is Ownable {
     //Client address removed to client whitelist event
     event ClientAddressRemoved(address addr);
     
+     //Allow to check technicians address from technicians whitelist contract
+    address techniciansWLAddr = 0x25C5C0F0d28F9F0F8DaDd2e106707f4712a339Ed;
+    TechniciansWL techniciansWL = TechniciansWL(techniciansWLAddr);
+  
+   /**
+   * @dev Throws if called by any account that's not a technician's.
+   */
+    modifier onlyTechnicians() {
+        require(techniciansWL.isTechnician(msg.sender));
+        _;
+    }
+    
+    /**
+   * @dev Change technicians whitelist address if this one was redeployed
+   * @param addr new address of the technician whitelist
+   */
+    function updateTechniciansWLAddress(address addr) onlyOwner public {
+        techniciansWL = TechniciansWL(addr);
+    }
+    
+    
+    /**
+   * @dev Check if addr is in client "whitelist" 
+   * @param addr wallet address
+   */
    function isClient(address addr) public returns(bool){
       if(client[addr]){
           return true;
@@ -27,28 +52,36 @@ contract ContratsClient is Ownable {
   
     string public nom;
     string public adressePostale;
+    string public codePostal;
+    string public ville;
     string public tel;
     string public mail;
 
-    address listOfClientAddr = 0xA2B2E27929B3e017268Df1b9EC3D033970303b5D ;
-    ListClients lc = ListClients(listOfClientAddr);
+    address listOfClientAddr = 0x85906b36DAD9F778fA42ccd7e4978c17aEE372b1;
+    ListClients lc = lc = ListClients(listOfClientAddr);
 
   
-  function setClient(string memory _nom, string memory _adressePostale, string memory _tel, string memory _mail) onlyTechnicians public{
+  function setClient(string memory _nom, string memory _adressePostale, string memory _codePostal, string memory _ville, string memory _tel, string memory _mail) onlyTechnicians public{
       nom = _nom;
       adressePostale = _adressePostale;
+      codePostal = _codePostal;
+      ville = _ville;
       tel = _tel;
       mail = _mail;
-      lc.addClient(address(this),_nom,_adressePostale,_tel,_mail);
+      lc.addClient(address(this),nom,adressePostale,codePostal,ville,tel,mail);
   }
   
-  function updateClient(string memory _nom, string memory _adressePostale, string memory _tel, string memory _mail) onlyTechnicians public {
+  
+  function updateClient(string memory _nom, string memory _adressePostale,string memory _codePostal, string memory _ville, string memory _tel, string memory _mail) onlyTechnicians public {
       nom = _nom;
       adressePostale = _adressePostale;
+      codePostal = _codePostal;
+      ville = _ville;
       tel = _tel;
       mail = _mail;
-      lc.updateClient(address(this),_nom,_adressePostale,_tel,_mail);
+      lc.updateClient(address(this),_nom,_adressePostale,_codePostal,_ville,_tel,_mail);
   }
+  
   
   
   /**
@@ -107,25 +140,10 @@ contract ContratsClient is Ownable {
   }
    
    
-   //Allow to check if sender is a technician
-    address techniciansWLAddr = 0x96110E5C38E1189c6e28b13C73a34F58f718b226; 
-    TechniciansWL techniciansWL = TechniciansWL(techniciansWLAddr);
-    
-    function updateTechniciansWLAddress(address addr) onlyOwner public {
-        techniciansWLAddr = addr;
-   }
-   
-    /**
-   * @dev Throws if called by any account that's not a technician's.
-   */
-    modifier onlyTechnicians() {
-        require(techniciansWL.isTechnician(msg.sender));
-        _;
-    }
    
    
     //Get technicians whitelist to avoid defining them everytime
-    struct contrat{
+    struct appareil{
         string  categorie;
         string  a_type;
         string  brand;
@@ -135,7 +153,7 @@ contract ContratsClient is Ownable {
     }
     
     
-    mapping(address => contrat) public contracts;   // mapping type of deployed contracts
+    mapping(address => appareil) public contracts;   // mapping type of deployed contracts
     address[] public deployed;   // store deployed contracts
     
 
@@ -143,7 +161,6 @@ contract ContratsClient is Ownable {
     function addContract(address _contract, string memory categorie, string memory a_type, string memory brand,string memory refer,string memory serial_n) public onlyTechnicians{
         updateContract(_contract,categorie,a_type,brand,refer,serial_n);
         contracts[_contract].statut= 1;
-        
         deployed.push(_contract);
     }
     
@@ -158,6 +175,7 @@ contract ContratsClient is Ownable {
     function updateContractStatus(address _contract, int statut) public onlyTechnicians{
         contracts[_contract].statut= statut;
     }
+    
     
     
     function getContracts() view public returns(address[] memory) {
