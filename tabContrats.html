@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Mes contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_tabContrats.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+  
+
+    <body onload="getInfoClient()">
+      <div class="wrapper">
+          <div class="sidebar">
+            <h2><i class="fas fa-tools"></i> My Repair</h2>
+              <ul>
+                  <li><a href="profilClient.html"><i class="fas fa-user-circle"></i>Profil client</a></li>
+                  <li><a href="deployContract.html"><i class="fas fa-shopping-cart"></i>Nouvel appareil</a></li>
+                  <li><a href="infoContrat.html"><i class="fas fa-list-ol"></i>Mes contrats</a></li>  
+              </ul> 
+          </div>
+
+          <div class="main_content">
+              <div class="header">Mes contrats</div>  
+                <div class="info">
+                    <h2><i class="fas fa-info" style="color:black" onclick="getInfoAppareil()"></i> Mes informations personnelles </h2>
+                    <p>
+                      Nom entreprise : <span id="nomEntrp">Loading...</span> <br></br>
+                      Adresse postale : <span id="adresseP">Loading...</span> <br></br>
+                      Code postal : <span id="codeP">Loading...</span> <br></br>
+                      Ville : <span id="ville">Loading...</span> <br></br>
+                      Email : <span id="email">Loading...</span> <br></br>
+                      Numéro de téléphone : <span id="numTel">Loading...</span> <br></br>
+                      <button onclick="infoClient()" class="button1"><i class="fas fa-edit"></i> Modifier mes infos</button>
+              
+                    </p>
+                </div>    
+            
+
+                <div class="hist">
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Liste de mes contrats</h2><br>
+                  <p>
+                  <table class ="historique">
+                      <thead>
+                          <tr>
+                              <th>Adresse contrat</th>
+                              <th>Catégorie</th>
+                              <th>Type</th>
+                              <th>Marque</th>
+                              <th>Référence</th>
+                              <th>Numéro de série</th>
+                              <th>Statut</th>
+                              <th>Type</th>
+                          </tr>
+                      </thead>
+                      <tbody></tbody>
+                  </table>
+                  </p>
+                </div>
+
+              </div>
+
+            
+        
+        </div>
+               
+
+      <script type="text/javascript">
+
+      
+
+         //Récupère les informations du client
+         async function getInfoClient() {
+
+            const nomEntrp = await window.contract.methods.categorie().call()
+            const adresseP = await window.contract.methods.a_type().call()
+            const codeP = await window.contract.methods.brand().call()
+            const ville = await window.contract.methods.refer().call()
+            const email = await window.contract.methods.serial_n().call()
+            const numTel = await window.contract.methods.statut().call()
+            document.getElementById("nomEntrp").innerHTML = nomEntrp;
+            document.getElementById("adresseP").innerHTML = adresseP;
+            document.getElementById("codeP").innerHTML = codeP;
+            document.getElementById("ville").innerHTML = ville;
+            document.getElementById("email").innerHTML = email;
+            document.getElementById("numTel").innerHTML = numTel;
+         }
+        
+       load();
+
+      </script>
+
+  </body>
+</html>
