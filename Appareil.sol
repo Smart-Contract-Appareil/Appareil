@@ -12,7 +12,7 @@ import "./ContratsClient.sol";
 contract Appareil is Ownable{
     
     //Allow to check technicians address from technicians whitelist contract
-    address techniciansWLAddr = 0x96110E5C38E1189c6e28b13C73a34F58f718b226;
+    address techniciansWLAddr = 0x25C5C0F0d28F9F0F8DaDd2e106707f4712a339Ed;
     TechniciansWL techniciansWL = TechniciansWL(techniciansWLAddr);
   
    /**
@@ -23,9 +23,13 @@ contract Appareil is Ownable{
         _;
     }
     
+    /**
+   * @dev Change technicians whitelist address if this one was redeployed
+   * @param addr new address of the technician whitelist
+   */
     function updateTechniciansWLAddress(address addr) onlyOwner public {
-    techniciansWLAddr = addr;
-   }
+        techniciansWL = TechniciansWL(addr);
+    }
     
     
     //Allow to check client identity through wallet 
@@ -54,23 +58,21 @@ contract Appareil is Ownable{
         uint256 id;
         string type_doc;
         uint date;
-        string company;
         string intervenant;
         string prix_tot;
     }
     
-    //List of item of the document
-    struct ItemPJ{
-        uint256 id;
-        string lib_1; string lib_2; string lib_3; string lib_4; string lib_5;
-        string dta_1; string dta_2; string dta_3; string dta_4; string dta_5;
-    }
     
     // Store & Fetch sales quote
-    mapping(uint => ItemPJ) public itemPJ;
     mapping(uint => DataPJ) public dataPJ;
     
-    //Count number of sales quote
+    // 2D list of attachment products 
+    // 1 table for 1 document 
+    string[][] ProductPJ;
+    // Nested table for each row of ProductPJ[id]
+    string[] public list;
+    
+    //Count number of attachments
     uint256 public pjCount;    
     
     
@@ -96,10 +98,10 @@ contract Appareil is Ownable{
     string ref_str = "Référence : ";
     string nb_serie_str = "Numéro de série : ";
     
-
     
     /**
-   * @dev set the device/equipment key informations and status to working (=1)
+   * @dev Deploys contract and set the device/equipment key informations and status to working (=1)
+   * @param contratsClientAddr adress of client's list of appareils contracts
    * @param cat category of the equipment (ex :cold / hot / AC)
    * @param ap_type type of the equipment (ex: oven, refrigerator , microwave)
    * @param marque brand of the equipment
@@ -126,6 +128,15 @@ contract Appareil is Ownable{
         
     }
     
+    
+    /**
+   * @dev updates the device/equipment key informations when changed (in this contract and in contratsCLient contract)
+   * @param cat category of the equipment (ex :cold / hot / AC)
+   * @param ap_type type of the equipment (ex: oven, refrigerator , microwave)
+   * @param marque brand of the equipment
+   * @param ref reference of the equipment
+   * @param nb_serie serial number 
+   */
     function editAppareil (string memory cat, string memory ap_type, string memory marque, string memory ref, string memory nb_serie) public onlyTechnicians {
         emit interventionEvent(edit);
         if(keccak256(abi.encodePacked(categorie)) != keccak256(abi.encodePacked(cat))){emit changeInfoEvent(cat_str,categorie,cat);}
@@ -182,16 +193,45 @@ contract Appareil is Ownable{
         }
     }
     
-    //l'emit sert au tableau pour le client
-    function setDataPJ (string memory type_doc, string memory company, string memory intervenant, string memory prix_tot) public onlyTechnicians
+    
+  /*
+   * @dev Settings of an an attachment
+   * @param type_doc quote or invoice
+   * @param intervenant technician's name
+   * @param prix_tot total cost
+   * @param products list of items in the document
+   */
+    function setPJ(string memory type_doc, string memory intervenant, string memory prix_tot, string[] memory products) public onlyTechnicians
     {
         pjCount ++;
-        dataPJ[pjCount] = DataPJ(pjCount, type_doc, now, company, intervenant, prix_tot);
+        
+        //Setting of general data of an attachment
+        dataPJ[pjCount] = DataPJ(pjCount, type_doc, now, intervenant, prix_tot);
+        
+        
+        //Add products to the table of the attachment
+        //fill the position 0 of the ProductPJ array, if pjCount = 1
+        if (pjCount == 1)
+        {
+            list.push("");
+            ProductPJ.push(list);
+        }
+        
+        //Initialize the list and push data
+        list = new string[](0);
+        for (uint256 i = 0; i < products.length; i++) {
+            list.push(products[i]);
+        }
+        ProductPJ.push(list);
+        
     }
-    
-    function setItemPJ (string memory lib_1, string memory lib_2, string memory lib_3, string memory lib_4, string memory lib_5, string memory dta_1, string memory dta_2, string memory dta_3, string memory dta_4, string memory dta_5) public onlyTechnicians
-    {
-        itemPJ[pjCount] = ItemPJ(pjCount, lib_1, lib_2, lib_3, lib_4, lib_5, dta_1, dta_2, dta_3, dta_4, dta_5);
+        
+    /*Get all product in string format of the attachment
+   * @dev Get all product in string format of the attachment
+   * @param identifiant index of the document to get 
+    */
+    function getProductPJ(uint identifiant) public view returns (string[] memory) {
+        return ProductPJ[identifiant];
     }
     
 }
