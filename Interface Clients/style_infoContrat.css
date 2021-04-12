@@ -129,8 +129,8 @@ td, th /* Mettre une bordure sur les td ET les th */
 .btn-group {
   
   position: absolute;
-  top: 290px;
-  right: 20px;
+  top: 300px;
+  right: 100px;
   
 }
 .btn-group button {
