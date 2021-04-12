@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Les contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_tabContrats.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abi.js"></script>
+  
+
+    <body onload="getInfoClient()">
+      <div class="wrapper">
+          <div class="sidebar">
+            <h2><i class="fas fa-tools"></i> BlockCare</h2>
+              <ul>
+                <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>      
+              </ul> 
+          </div>
+
+          <div class="main_content">
+              <div class="header">Contrats client</div>  
+                <div class="info">
+                    <h2><i class="fas fa-info" style="color:black"></i> Informations personnelles client </h2>
+                    <p>
+                      Nom entreprise : <span id="nomEntrp">Loading...</span> <br></br>
+                      Adresse postale : <span id="adresseP">Loading...</span> <br></br>
+                      Code postal : <span id="codeP">Loading...</span> <br></br>
+                      Ville : <span id="ville">Loading...</span> <br></br>
+                      Email : <span id="email">Loading...</span> <br></br>
+                      Numéro de téléphone : <span id="numTel">Loading...</span> <br></br>
+
+              
+                    </p>
+                </div> 
+                
+                <div class="btn-group">
+                    
+                    <button><a href="devisBis.html" style="color:#ffffff"><i class="fas fa-edit"></i> Modifier les informations client</a></button>
+                    <button><a href="newAppareil.html" style="color:#ffffff"><i class="fas fa-cart-plus"></i> Ajouter un nouvel appareil</a></button>
+
+                </div>
+            
+
+                <div class="hist">
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Liste des contrats</h2><br>
+                  <p>
+                  <table class ="historique">
+                      <thead>
+                          <tr>
+                              <th>Adresse contrat</th>
+                              <th>Catégorie</th>
+                              <th>Type</th>
+                              <th>Marque</th>
+                              <th>Référence</th>
+                              <th>Numéro de série</th>
+                              <th>Statut</th>
+                              <th>Type</th>
+                          </tr>
+                      </thead>
+                      <tbody></tbody>
+                  </table>
+                  </p>
+                </div>
+
+              </div>
+
+            
+        
+        </div>
+               
+
+      <script type="text/javascript">
+
+      
+
+         //Récupère les informations du client
+         async function getInfoClient() {
+
+             //Changer les call en fonction du nom des variables du smart contract
+             document.getElementById("nomEntrp").innerHTML = await window.contract.methods.nomEntrp().call();
+            document.getElementById("adresseP").innerHTML = await window.contract.methods.adresseP().call();
+            document.getElementById("codeP").innerHTML = await window.contract.methods.codeP().call();
+            document.getElementById("ville").innerHTML = await window.contract.methods.ville().call();
+            document.getElementById("email").innerHTML = await window.contract.methods.email().call();
+            document.getElementById("numTel").innerHTML = await window.contract.methods.numTel().call();
+         }
+        
+       load();
+
+      </script>
+
+  </body>
+</html>

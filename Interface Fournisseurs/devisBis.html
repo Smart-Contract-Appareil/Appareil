@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <head>
+            <meta charset='utf-8'>
+            <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+            <title>Nouveau document</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <link rel="stylesheet" href="style_devis.css">
+            <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
+            <script type="text/javascript" src="abi2.js"></script>
+        </head>
+    </head>
+
+<body>
+    <body onload="createTable()">
+        <div class="wrapper">
+            <div class="sidebar">
+              <h2><i class="fas fa-tools"></i> BlockCare</h2>
+                <ul>
+                    <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                    <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                    <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>
+                </ul> 
+            </div>
+            <div class="main_content">
+                <div class="header">Document</div>  
+                <div class="app">
+                  <h1>Appareil XXXX</h1>
+                  <div class="info">
+                      <h2><i class="fas fa-info" style="color:black"></i> Nouveau document</h2>
+
+                        <form id="Data">
+                            <fieldset>
+                            <legend><b>Informations</b></legend>
+                            <div>
+                                &emsp;<select id = "type_doc" class = "type_doc_select" required>
+                                    <option value="">--Type document--</option>
+                                    <option value="Devis">Devis</option>
+                                    <option value="Facture">Facture</option>
+                                </select><br><br>  
+                                &emsp;Devis établi par : <input id="intervenant" type="text" value="" required/>
+                                
+                            </div>
+                            </fieldset><br>
+                        </form>
+
+                        <p>
+                        Ajouter un élément : <input type="button" id="addRow" value="Ajouter" onclick="addRow()" />
+                        </p>
+                        
+                        <div id="cont"></div>  <!-- the container to add the TABLE -->
+                        
+                        <br><br><p>
+                        <button id="bt" class="button1" onclick="submit()"><i class="fas fa-save"></i> &nbspValider</button>
+                        <button class="button1"><a href="infoContrat.html" style="color:#ffffff"><i class="fas fa-arrow-left"></i> &nbspRetour</a></button>
+                        </p>
+                            
+                        <p id='output'></p>
+        
+        
+        <script>
+            var contractAddress = '0xC33f709363f57805D8bb5f5113aEF11829C08C67';
+
+            //#region --Définition de la classe (tableau PJ)--
+            class evt{
+                id;
+                type_doc;
+                time_date_transac;
+                intervenant;
+                prix_tot; 
+                
+                constructor(id, type_doc, time_date_transac, nom_entreprise, intervenant, prix_tot){
+                    this.id = id;
+                    this.type_doc = type_doc;
+                    this.time_date_transac = time_date_transac;
+                    this.intervenant = intervenant;
+                    this.prix_tot = prix_tot;
+                }
+                //Getters
+                get id(){return this.id;}
+                get type_doc(){return this.type_doc;}
+                get time_date_transac(){return this.time_date_transac;}
+                get intervenant(){return this.intervenant;}  
+                get prix_tot(){return this.prix_tot;}  
+            } 
+            //#endregion           
+
+            async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+
+            async function loadContract() {
+                return await new window.web3.eth.Contract(ABI2, contractAddress);
+            }
+
+            //Envoyer les données du devis dans la blockchain
+            async function setInfoDevis() {
+
+                //Détection automatique du compte
+                var account = await web3.eth.getAccounts(); 
+                account = account[0];
+
+                // function to extract and submit table data.
+                var doc_tab = document.getElementById('empTable');
+                var tableauFinal = new Array();
+                var total = 0;
+
+                //loop through each row of the table.
+                for (row = 1; row < doc_tab.rows.length - 1; row++) {
+                    // loop through each cell in a row.
+                    var sous_tab = [];
+                    var sous_tot = 0;
+                    for (c = 0; c < doc_tab.rows[row].cells.length; c++) {  
+                        var element = doc_tab.rows.item(row).cells[c];
+                        var qte; var prix;
+                        if (element.childNodes[0].getAttribute('type') == 'text'|| element.childNodes[0].getAttribute('type') == 'number') {
+                            sous_tab.push(element.childNodes[0].value);
+                        }
+                        //calcul du sous_total
+                        if (c == 2) { qte = element.childNodes[0].value ; console.log("qte : ", qte); }
+                        if (c == 3) {prix = element.childNodes[0].value ; console.log("prix : ", prix);}
+                        sous_tot = parseFloat(qte)* parseFloat(prix);
+                    }
+                    total = total + sous_tot;
+                    
+                    if (sous_tab.length > 0)
+                    {
+                        tableauFinal.push(JSON.stringify(sous_tab));
+                    }
+                }
+                var prixTOT = total.toString();
+                var type_doc = document.getElementById('type_doc').value;
+                var intervenant = document.getElementById('intervenant').value;
+                console.log("prix tot : ", prixTOT);
+                console.log("tableauFinal : ", tableauFinal);
+                const DataPJ = await window.contract.methods.setPJ(type_doc, intervenant, prixTOT, tableauFinal).send({from: account});
+            }
+
+
+            async function load() {
+                await loadWeb3();
+                window.contract = await loadContract();
+            }
+
+            load();
+
+            //#region -- Gestion de l'affichage en visualisation --
+            var arrHead = new Array();	// array for header.
+            arrHead = ['', 'Description', 'Quantité', 'Prix unitaire'];
+
+            // first create TABLE structure with the headers. 
+            function createTable() {
+                var empTable = document.createElement('table');
+                empTable.setAttribute('id', 'empTable'); // table id.
+
+                var tr = empTable.insertRow(-1);
+                for (var h = 0; h < arrHead.length; h++) {
+                    var th = document.createElement('th'); // create table headers
+                    th.innerHTML = arrHead[h];
+                    tr.appendChild(th);
+                }
+
+                var div = document.getElementById('cont');
+                div.appendChild(empTable);  // add the TABLE to the container.
+            }
+
+            // now, add a new to the TABLE.
+            function addRow() {
+                var empTab = document.getElementById('empTable');
+
+                var rowCnt = empTab.rows.length;   // table row count.
+                var tr = empTab.insertRow(rowCnt); // the table row.
+                tr = empTab.insertRow(rowCnt);
+
+                for (var c = 0; c < arrHead.length; c++) {
+                    var td = document.createElement('td'); // table definition.
+                    td = tr.insertCell(c);
+
+                    if (c == 0) {      // the first column.
+                        // add a button in every new row in the first column.
+                        var button = document.createElement('input');
+
+                        // set input attributes.
+                        button.setAttribute('type', 'button');
+                        button.setAttribute('value', 'Supprimer');
+
+                        // add button's 'onclick' event.
+                        button.setAttribute('onclick', 'removeRow(this)');
+
+                        td.appendChild(button);
+                    }
+                    else if (c == 1) {
+                        // 2nd, 3rd and 4th column, will have textbox.
+                        var ele = document.createElement('input');
+                        ele.setAttribute('type', 'text');
+                        ele.setAttribute('value', '');
+
+                        td.appendChild(ele);
+                    }
+                    else {
+                        var ele = document.createElement('input');
+                        ele.setAttribute('type', 'number');
+                        ele.setAttribute('value', '');
+                        ele.setAttribute('min', '0');
+                        td.appendChild(ele);
+
+                    }
+                }
+            }
+
+            // delete TABLE row function.
+            function removeRow(oButton) {
+                var empTab = document.getElementById('empTable');
+                empTab.deleteRow(oButton.parentNode.parentNode.rowIndex); // button -> td -> tr.
+            }
+            //#endregion
+        </script>
+
+    </body>
+</html>
