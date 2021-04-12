@@ -62,23 +62,22 @@ body{
 
 .wrapper .main_content{
   width: 100%;
-  margin-left: 200px;
+  margin-left: 300px;
+  position: relative;
 }
 
-.wrapper .main_content .header{
-  padding: 20px;
-  background: #fff;
-  color: #000000;
-  font-size: 40px;
-  border-bottom: 1px solid #e0e4e8;
-  text-align: center;
+img {
+ width: 100%;
+ opacity: 0.3;
+ filter: grayscale(100%)
 }
 
-
-.wrapper .main_content .info {
-  padding : 80px;
-  text-align: center;
+.center {
+  position: absolute;
+  top: 50%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  font-size: 60px;
 }
-
 
 
