@@ -1,93 +1,179 @@
 pragma experimental ABIEncoderV2;
 pragma solidity ^0.6.12;
 
-import "./Whitelist.sol";
+
 import "./Ownable.sol";
+import "./TechniciansWL.sol";
+import "./ListClients.sol";
 
 
-contract ContratsClient is Whitelist {
-    
+contract ContratsClient is Ownable {
+
     //Store the client addresses (if many account in the same company)
     mapping(address => bool) public client;
-    
-    mapping(address => string) public contracts;   // mapping type of deployed contracts
-    address[] public deployed;   // store deployed contracts
-    
     //Client address added to client whitelist event
     event ClientAddressAdded(address addr);
     //Client address removed to client whitelist event
     event ClientAddressRemoved(address addr);
-
-    /**
-    * @dev Throws if called by any account that's not the client.
-    */
-    modifier onlyClient() {
-        require(client[msg.sender]);
+    
+     //Allow to check technicians address from technicians whitelist contract
+    address techniciansWLAddr = 0x8e92dd97e0D5D8ec06bD9E2607b89F4Ceaae8150;
+    TechniciansWL techniciansWL = TechniciansWL(techniciansWLAddr);
+  
+   /**
+   * @dev Throws if called by any account that's not a technician's.
+   */
+    modifier onlyTechnicians() {
+        require(techniciansWL.isTechnician(msg.sender));
         _;
     }
-
+    
     /**
-    * @dev add an address to Client
-    * @param addr address
-    * @return success true if the address was added to the chosen whitelist, false if the address was already in the whitelist
-    */
-    function addAddressToClient(address addr) onlyOwner public returns(bool success) {
+   * @dev Change technicians whitelist address if this one was redeployed
+   * @param addr new address of the technician whitelist
+   */
+    function updateTechniciansWLAddress(address addr) onlyOwner public {
+        techniciansWL = TechniciansWL(addr);
+    }
+    
+    
+    /**
+   * @dev Check if addr is in client "whitelist" 
+   * @param addr wallet address
+   */
+   function isClient(address addr) public returns(bool){
+      if(client[addr]){
+          return true;
+      }
+      else {
+          return false;
+      }
+    }
+  
+    string public nom;
+    string public adressePostale;
+    string public tel;
+    string public mail;
+
+    address listOfClientAddr = 0x41B921b2E5e028A30cb871b1eF2E3796AB187aD6;
+    ListClients lc = ListClients(listOfClientAddr);
+
+  
+  function setClient(string memory _nom, string memory _adressePostale, string memory _tel, string memory _mail) onlyTechnicians public{
+      nom = _nom;
+      adressePostale = _adressePostale;
+      tel = _tel;
+      mail = _mail;
+      lc.addClient(address(this),nom,adressePostale,tel,mail);
+  }
+  
+  
+  function updateClient(string memory _nom, string memory _adressePostale, string memory _tel, string memory _mail) onlyTechnicians public {
+      nom = _nom;
+      adressePostale = _adressePostale;
+      tel = _tel;
+      mail = _mail;
+      lc.updateClient(address(this),_nom,_adressePostale,_tel,_mail);
+  }
+  
+  
+  
+  /**
+   * @dev add an address to the client whitelist
+   * @param addr address
+   * @return success true if the address was added to the client whitelist
+   */
+  function addAddressToWhitelist(address addr) onlyTechnicians public returns(bool success) {
         if (!client[addr]) {
             client[addr] = true;
             emit ClientAddressAdded(addr);
             success = true;
-        } 
-    }
+        }    
+  }
 
-    /**
-    * @dev add addresses to Client
-    * @param addrs addresses
-    * @return success true if at least one address was added to Client,
-    * false if all addresses were already in the whitelist
-    */
-    function addAddressesToClient(address[] memory addrs) onlyOwner public returns(bool success) {
-        for (uint256 i = 0; i < addrs.length; i++) {
-            if (addAddressToClient(addrs[i])) {
-                success = true;
-            }
-        }
-    }
 
-    /**
-    * @dev remove an address from Client
-    * @param addr address
-    * @return success true if the address was removed from Client,
-    * false if the address wasn't in Client in the first place
-    */
-    function removeAddressFromClient(address addr) onlyOwner public returns(bool success) {
-        if (client[addr]) {
+  /**
+   * @dev add addresses to the chosen whitelist
+   * @param addrs addresses
+   * @return success true if at least one address was added to the client whitelist,
+   */
+  function addAddressesToWhitelist(address[] memory addrs) onlyTechnicians public returns(bool success) {
+    for (uint256 i = 0; i < addrs.length; i++) {
+      if (addAddressToWhitelist(addrs[i])) {
+        success = true;
+      }
+    }
+  }
+
+
+  /**
+   * @dev remove an address from the client whitelist
+   * @param addr address
+   * @return success true if the address was removed from the chosen whitelist,
+   */
+  function removeAddressFromWhitelist(address addr) onlyTechnicians public returns(bool success) {
+        if(client[addr]) {
             client[addr] = false;
             emit ClientAddressRemoved(addr);
             success = true;
         }
-    }
+  }
 
-    /**
-    * @dev remove addresses from Client
-    * @param addrs addresses
-    * @return success true if at least one address was removed from the chosen whitelist,
-    * false if all addresses weren't in the whitelist in the first place
-    */
-    function removeAddressesFromClient(address[] memory addrs) onlyOwner public returns(bool success) {
-        for (uint256 i = 0; i < addrs.length; i++) {
-            if (removeAddressFromClient(addrs[i])) {
-                success = true;
-            }
-        }
-    }
 
-    function addContract(address _contract, string memory _serialn) public onlyTechnicians{
-        contracts[_contract]= _serialn;
+  /**
+   * @dev remove addresses from the client whitelist
+   * @param addrs addresses
+   * @return success true if at least one address was removed from the client whitelist,
+   */
+  function removeAddressesFromWhitelist(address[] memory addrs) onlyTechnicians public returns(bool success) {
+    for (uint256 i = 0; i < addrs.length; i++) {
+      if (removeAddressFromWhitelist(addrs[i])) {
+        success = true;
+      }
+    }
+  }
+   
+   
+   
+   
+    //Get technicians whitelist to avoid defining them everytime
+    struct appareil{
+        string  categorie;
+        string  a_type;
+        string  brand;
+        string  refer;
+        string  serial_n;
+        int  statut;
+    }
+    
+    
+    mapping(address => appareil) public contracts;   // mapping type of deployed contracts
+    address[] public deployed;   // store deployed contracts
+    
+
+
+    function addContract(address _contract, string memory categorie, string memory a_type, string memory brand,string memory refer,string memory serial_n) public onlyTechnicians{
+        updateContract(_contract,categorie,a_type,brand,refer,serial_n);
+        contracts[_contract].statut= 1;
         deployed.push(_contract);
     }
     
-    /*
-    function getContracts() view public returns(address[]) {
+    function updateContract(address _contract, string memory categorie, string memory a_type, string memory brand,string memory refer,string memory serial_n) public onlyTechnicians{
+        contracts[_contract].categorie= categorie;
+        contracts[_contract].a_type= a_type;
+        contracts[_contract].brand= brand;
+        contracts[_contract].refer= refer;
+        contracts[_contract].serial_n= serial_n;
+    }
+    
+    function updateContractStatus(address _contract, int statut) public onlyTechnicians{
+        contracts[_contract].statut= statut;
+    }
+    
+    
+    
+    function getContracts() view public returns(address[] memory) {
         return deployed;
-    }*/
+    }
+
 }
