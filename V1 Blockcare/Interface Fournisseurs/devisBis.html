@@ -11,7 +11,7 @@
             <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
-            <script type="text/javascript" src="abi2.js"></script>
+            <script type="text/javascript" src="./abiAppareil.js"></script>
         </head>
     </head>
 
@@ -55,7 +55,7 @@
                         <div id="cont"></div>  <!-- the container to add the TABLE -->
                         
                         <br><br><p>
-                        <button id="bt" class="button1" onclick="submit()"><i class="fas fa-save"></i> &nbspValider</button>
+                        <button id="bt" class="button1" onclick="setInfoDevis()"><i class="fas fa-save"></i> &nbspValider</button>
                         <button class="button1"><a href="infoContrat.html" style="color:#ffffff"><i class="fas fa-arrow-left"></i> &nbspRetour</a></button>
                         </p>
                             
@@ -73,7 +73,6 @@
 
             processUser();
 
-            //var contractAddress = '0xC33f709363f57805D8bb5f5113aEF11829C08C67';
 
             //#region --Définition de la classe (tableau PJ)--
             class evt{
@@ -107,15 +106,16 @@
             }    
 
             async function loadContract() {
-                return await new window.web3.eth.Contract(ABI2, contractAddress);
+                return await new window.web3.eth.Contract(ABIAppareil, contractAddress);
             }
+
+            
 
             //Envoyer les données du devis dans la blockchain
             async function setInfoDevis() {
-
                 //Détection automatique du compte
-                var account = await web3.eth.getAccounts(); 
-                account = account[0];
+                var accounts = await ethereum.request({ method: 'eth_accounts'}); 
+                var account = accounts[0];
 
                 // function to extract and submit table data.
                 var doc_tab = document.getElementById('empTable');
@@ -124,26 +124,26 @@
 
                 //loop through each row of the table.
                 for (row = 1; row < doc_tab.rows.length - 1; row++) {
-                    // loop through each cell in a row.
+                // loop through each cell in a row.
                     var sous_tab = [];
                     var sous_tot = 0;
-                    for (c = 0; c < doc_tab.rows[row].cells.length; c++) {  
-                        var element = doc_tab.rows.item(row).cells[c];
-                        var qte; var prix;
-                        if (element.childNodes[0].getAttribute('type') == 'text'|| element.childNodes[0].getAttribute('type') == 'number') {
-                            sous_tab.push(element.childNodes[0].value);
-                        }
-                        //calcul du sous_total
-                        if (c == 2) { qte = element.childNodes[0].value ; console.log("qte : ", qte); }
-                        if (c == 3) {prix = element.childNodes[0].value ; console.log("prix : ", prix);}
-                        sous_tot = parseFloat(qte)* parseFloat(prix);
-                    }
-                    total = total + sous_tot;
-                    
-                    if (sous_tab.length > 0)
-                    {
-                        tableauFinal.push(JSON.stringify(sous_tab));
-                    }
+                for (c = 0; c < doc_tab.rows[row].cells.length; c++) {  
+                    var element = doc_tab.rows.item(row).cells[c];
+                    var qte; var prix;
+                if (element.childNodes[0].getAttribute('type') == 'text'|| element.childNodes[0].getAttribute('type') == 'number') {
+                    sous_tab.push(element.childNodes[0].value);
+                }
+                //calcul du sous_total
+                if (c == 2) { qte = element.childNodes[0].value ; console.log("qte : ", qte); }
+                if (c == 3) {prix = element.childNodes[0].value ; console.log("prix : ", prix);}
+                    sous_tot = parseFloat(qte)* parseFloat(prix);
+                }
+                total = total + sous_tot;
+
+                if (sous_tab.length > 0)
+                {
+                    tableauFinal.push(JSON.stringify(sous_tab));
+                }
                 }
                 var prixTOT = total.toString();
                 var type_doc = document.getElementById('type_doc').value;
@@ -152,6 +152,7 @@
                 console.log("tableauFinal : ", tableauFinal);
                 const DataPJ = await window.contract.methods.setPJ(type_doc, intervenant, prixTOT, tableauFinal).send({from: account});
             }
+
 
 
             async function load() {

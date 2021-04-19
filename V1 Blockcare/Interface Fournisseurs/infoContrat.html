@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="style_infoContrat.css">
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script type="text/javascript" src="abiAppareil.js"></script>
+    <script type="text/javascript" src="./abiAppareil.js"></script>
   
 
     <body onload="getInfoAppareil()">
@@ -41,20 +41,9 @@
                 <div class="btn-group">
                     
                     <button onclick="openIntervention()"><i class="fas fa-toolbox"></i>  Travaux d'intervention</button>
-                    <form action="updateAppareil.html">
-                        <input id="CA" type="hidden" name="CA"/>
-                        <input id="ACC" type="hidden" name="ACC"/>
-                        <button onclick="passVariables()" type="submit"><i class="fas fa-info"></i>  Modifier informations de l'appareil</button>
-                    </form>
-                    <form action="devisBis.html">
-                        <input id="CA" type="hidden" name="CA"/>
-                        <button onclick="passVariables()" type="submit"><i class="fas fa-info"></i>  Nouveau devis</button>
-                    </form>
-                    <form action="historiquePJ.html">
-                        <input id="CA" type="hidden" name="CA"/>
-                        <button onclick="passVariables()" type="submit"><i class="fas fa-info"></i>  Historique des pièces jointes</button>
-                    </form>
-
+                    <button onclick="goTo('updateAppareil')" type="submit"><i class="fas fa-info"></i>  Modifier informations de l'appareil</button>
+                    <button onclick="goTo('devisBis')" type="submit"><i class="fas fa-info"></i>  Nouveau devis d'intervention</button>
+                    <button onclick="goTo('historiquePJ')" type="submit"><i class="fas fa-info"></i>  Historique des pièces jointes</button>
                 </div>
               
 
@@ -127,6 +116,12 @@
             document.getElementById("CA").value = contractAddress ;
             document.getElementById("ACC").value = addressContratsClient ;
         }
+
+        function goTo(page){
+            var url = page + ".html?CA=" + encodeURIComponent(contractAddress) + "&ACC=" + encodeURIComponent(addressContratsClient);
+            window.location.href = url
+        }
+          
 
         /*
         * Etablit la connexion avec Metamask
@@ -355,6 +350,7 @@
             console.log("A little problem with the status..")
             }
         }
+
 
 
         load();
