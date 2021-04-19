@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <head>
+            <meta charset='utf-8'>
+            <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+            <title>Historique  PJ</title>
+            <meta name='viewport' content='width=device-width, initial-scale=1'>
+            <link rel="stylesheet" href="style_historiquePJ.css">
+            <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
+            <script type="text/javascript" src="abiAppareil.js"></script>
+        </head>
+    </head>
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+            <h2><i class="fas fa-tools"></i> BlockCare</h2>
+            <ul>
+                <li><a onclick="goTo('pageAccueil')"><i class="fas fa-building"></i>Page d'accueil</a></li> 
+                <li><a onclick="goTo('infoClient')"><i class="fas fa-user-circle"></i>Mes informations</a></li> 
+                <li><a onclick="goTo('tabContrats')"><i class="fas fa-list-ol"></i>Mes contrats</a></li> 
+                <li><a onclick="goTo('aide')"><i class="fas fa-info-circle"></i>Aide</a></li>
+            </ul>
+          </div>
+          <div class="main_content">
+              <div class="header">Documents pièces jointes</div>  
+              <div class="app">
+                <h1>Appareil</h1>
+
+                <div class="hist">
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Tableau des pièces jointes</h2>
+                    <table class ="historique">
+                        <thead>
+                            <tr>
+                                <th>Identifiant</th>
+                                <th>Type de document</th>
+                                <th>Date/Heure</th>
+                                <th>Nom de l'intervenant</th>
+                                <th>Prix total</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>h
+                        <tbody></tbody>
+                    </table>
+                </div>
+                <br></br>
+
+                <button class="button1"><a onclick="goTo2()"style="color:#ffffff"><i class="fas fa-arrow-left"></i> Retour</a></button>
+
+        <script type="text/javascript">  
+
+            function processUser()
+            {
+                var parameters = location.search.substring(1).split("&");
+                var temp = parameters[0].split("=");
+                contractAddress = unescape(temp[1]); //ne pas mettre var 
+                temp = parameters[1].split("=");
+                addressContratsClient = unescape(temp[1]); //ne pas mettre var 
+            }
+
+            processUser();
+
+            /*
+            *Faire passer les variables dans l'URL
+            */
+            function goTo(page){
+                var url = page +".html?CCA=" + encodeURIComponent(addressContratsClient);
+                window.location.href = url
+            }
+
+            function goTo2(){
+                var url = "infoContrat.html?CA=" + encodeURIComponent(contractAddress)+ "&CCA=" + encodeURIComponent(addressContratsClient);
+                window.location.href = url
+            }
+            
+
+            //var contractAddress = '0xC33f709363f57805D8bb5f5113aEF11829C08C67';
+
+            class evt{
+            id;
+            type_doc;
+            time_date_transac;
+            intervenant;
+            prix_tot; 
+
+            constructor(id, type_doc, time_date_transac, intervenant, prix_tot){
+                this.id = id;
+                this.type_doc = type_doc;
+                this.time_date_transac = time_date_transac;
+                this.intervenant = intervenant;
+                this.prix_tot = prix_tot;
+            }
+            //Getters
+            get id(){return this.id;}
+            get type_doc(){return this.type_doc;}
+            get time_date_transac(){return this.time_date_transac;}
+            get intervenant(){return this.intervenant;}  
+            get prix_tot(){return this.prix_tot;}  
+            }
+
+            async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+
+            async function loadContract() {
+                return await new window.web3.eth.Contract(ABIAppareil, contractAddress);
+            }
+
+            async function loadEvents(){
+
+                const nb_elem_pj = await window.contract.methods.pjCount().call();
+                console.log("Compteur : ",  nb_elem_pj);
+
+                var listPj = new Array();
+                for (let counter = 0; counter < nb_elem_pj; counter++)
+                {
+                    const donnee_PJ = await window.contract.methods.dataPJ(counter+1).call(); 
+                    listPj.push(
+                        new evt(
+                            donnee_PJ.id,
+                            donnee_PJ.type_doc,
+                            (new Date(donnee_PJ.date * 1000)).toLocaleString(),
+                            donnee_PJ.intervenant,
+                            donnee_PJ.prix_tot += "€"
+                        )
+                    );
+                }
+                console.log("ma nouvelle liste : ", listPj);
+
+                return listPj;
+            }
+
+            async function getDevis(identifiant) {
+                console.log("Identifiant pour appeler les méthodes : ", identifiant);
+
+                //Donnée de l'appareil
+                const categorie = "Catégorie : " + await window.contract.methods.categorie().call();
+                const a_type    = await window.contract.methods.a_type().call();
+                const marque    = await window.contract.methods.brand().call();
+                const ref       = "Référence : " + await window.contract.methods.refer().call();
+                const nb_serie  = "Numéro de série : " + await window.contract.methods.serial_n().call();
+                const statut    = await window.contract.methods.statut().call();
+                //Donnée de la pièce-jointe
+                const donnee_PJ     = await window.contract.methods.dataPJ(identifiant).call(); 
+                const document      = donnee_PJ.type_doc +  " du " + (new Date(donnee_PJ.date * 1000)).toLocaleString();
+                const intervenant   = "Intervenant : " + donnee_PJ.intervenant;
+                const prix_total    = donnee_PJ.prix_tot += "€";
+
+                //Traitement du code du statut
+                var statut_libel = "";
+                switch(statut)
+                {
+                    case "0":
+                        statut_libel = " de réparation";
+                        break;
+                    case "1":
+                        statut_libel = "de maintenance";
+                        break;
+                    default:
+                        statut_libel = "";
+                }
+
+                //Construction du libellé de la PJ
+                const titre_pj = "Travaux " + statut_libel + " sur " + a_type + " " + marque;
+
+                //Récupération de la liste des produits
+                const productList_PJ = await window.contract.methods.getProductPJ(identifiant).call(); 
+
+                var headers = {
+                    file_1:{
+                        col_1:{ text: 'Produit', style: 'tableHeader', alignment: 'center', fillColor: '#dddddd' },
+                        col_2:{ text: 'Quantité', style: 'tableHeader', alignment: 'center', fillColor: '#dddddd' }, 
+                        col_3:{ text: 'Prix unitaire', style: 'tableHeader', alignment: 'center', fillColor: '#dddddd' },
+                        col_4:{ text: 'Total HT', style: 'tableHeader', alignment: 'center', fillColor: '#dddddd' }
+                    }
+                }
+
+                var body = [];
+                for (var key in headers){
+                    if (headers.hasOwnProperty(key)){
+                        var header = headers[key];
+                        var row = new Array();
+                        row.push( header.col_1 );
+                        row.push( header.col_2 );
+                        row.push( header.col_3 );
+                        row.push( header.col_4 );
+                        body.push(row);
+                    }
+                }
+
+                var productString = productList_PJ.toString(); //liste transformée en string
+                var productTab = productString.split("],"); //transforme en array
+                for (var i=0; i<productTab.length; i++) //itére dans le tableau 
+                {
+                    if (productTab[i].slice(-1) != "]") //rajouter crocher s'il y a plus
+                    {
+                        productTab[i] += "]";
+                    }
+                    var data = JSON.parse( productTab[i] ); //transforme les strings de l'array en array
+                    var row = new Array();
+                    var qte =  parseFloat(data[2]);
+                    var prix = parseFloat(data[1]);
+                    var tot = qte * prix;
+                    row.push( data[0] );
+                    row.push( data[1] );
+                    row.push( data[2] += "€" );
+                    row.push( tot += "€" );
+                    body.push(row);
+                }
+
+                var PDF = {
+                footer: function(currentPage, pageCount) {                 
+                        if (currentPage == pageCount)
+                        return {margin: [5, 0, 10, 0], text: 'Conditions de réglement : 30% à la commande. Paiement à réception de facture. \n Toute somme non payée à sa date exigible produira de plein droit des intérêts de retard équivalents au paiement de 40€ due au titre des frais de recouvrement.', color: 'gray', alignment: 'center', fontSize: 10};
+                        },
+                content: [
+                    {image: 'data:image/png;base64,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',
+                    width: 100,
+                    alignment: 'right'
+                    },
+                    {text: '\n\n'},
+                    {text: intervenant, bold: true, fontSize: 12},
+                    {text: categorie, fontSize: 12},
+                    {text: ref, fontSize: 12},
+                    {text: nb_serie, fontSize: 12},
+                    {text: '\n\n\n'},
+                    {
+                        text: document, 
+                        style: 'header',
+                        alignment: 'center'
+                    },
+                    {text: titre_pj, alignment: 'center', italics:true},
+                    {text: '\n\n'},
+                    {
+                    table: {
+                        widths: [250, 70, 70, 70],
+                        headerRows: 0,
+                        body: body
+                    },
+                    },
+                    {
+                        table: {
+                            widths: [250, 70, 70, 70],
+                            body: [
+                                [{text: '', border: [false, false, false, false] }, {text: '', border: [false, false, false, false] }, {text: 'Total', alignment: 'right', italics:true, border: [false, false, false, false]}, {text: prix_total, border: [true, false, true, true]}]
+                            ]
+                        }
+                    },
+                ],
+                }
+                //Génération du PDF (téléchargement côté client)
+                pdfMake.createPdf(PDF).download();
+            }
+
+            async function load() {
+                await loadWeb3();
+                window.contract = await loadContract();
+                // Récupère tous les events
+                var events = await loadEvents();
+
+                setTimeout(function(){ 
+                let tempEvents = events;
+                if(tempEvents.length>0){
+                    /// MUST DO EVERY TREATMENT HERE FROM NOW ON ///
+                    console.log("dans setTimeout", events);
+                    createTable(events);
+                }
+                else{
+                    console.log("length = 0");
+                }
+            }, 2000);
+            }
+
+            /*
+            * Créer des lignes pour peupler le tableau avec les evt présents dans l'array
+            */
+            function createRow(evt){
+                let tr = document.createElement('tr');
+
+                console.log("taille tableau : ", evt);
+
+                const tdID = document.createElement('td');
+                tdID.innerText = evt.id ;
+                tr.appendChild(tdID);
+
+                const tdTypDoc = document.createElement('td');
+                tdTypDoc.innerText = evt.type_doc ;
+                tr.appendChild(tdTypDoc);
+
+                const tdDate = document.createElement('td');
+                tdDate.innerText = evt.time_date_transac ;
+                tr.appendChild(tdDate);
+
+                const tdIntervenant = document.createElement('td');
+                tdIntervenant.innerText = evt.intervenant ;
+                tr.appendChild(tdIntervenant);
+
+                const tdPrix_Tot = document.createElement('td');
+                tdPrix_Tot.innerText = evt.prix_tot ;
+                tr.appendChild(tdPrix_Tot);
+
+                const action = document.createElement('td');
+                action.innerHTML = '<button type="button" onclick = "getDevis(\'' + evt.id + '\')">Télécharger la pièce jointe</button>';
+                tr.appendChild(action);    
+
+                return tr
+            }
+
+            function createTable(events){
+                const tbody = document.querySelector('.historique tbody');
+                events.forEach(evt => tbody.appendChild(createRow(evt)));
+                console.log("taille tableau : ", events.length);
+            }
+            load();
+            
+        </script>
+    </body>
+
+</html>

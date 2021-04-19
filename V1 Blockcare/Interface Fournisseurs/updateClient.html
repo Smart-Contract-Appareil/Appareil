@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Edit Client</title>
+    <link rel="stylesheet" href="style_newAppareil.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereumjs/browser-builds/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
+    <script type="text/javascript" src="abiTechniciansWL.js"></script>
+    <script type="module" src="abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="abiListClients.js"></script>
+    <script type="module" src="abiListClients.js"></script>
+    <script type="text/javascript" src="abiContratsClient.js"></script>
+    <script type="module" src="abiContratsClient.js"></script>
+    <script type="text/javascript" src="dataContratsClient.js"></script>
+    <script type="module" src="dataContratsClient.js"></script>
+
+
+    </head>
+    
+    <body>
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2><i class="fas fa-tools"></i> BlockCare</h2>
+                <ul>
+                    <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                    <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                    <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Mise à jour</div>
+                <div class='titre'>
+                    <h2><i class="fas fa-folder-plus" style="color:black"></i> Mettre à jour les informations du client</h2>
+                </div>
+                <div class='formulaire'>
+                    <form>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-building icon"></i>
+                        <input class="input-field" type="text" placeholder="Nom entreprise" id="nameEntrp" required> </input>
+                        </div>
+                    
+                        <div class="input-container">
+                        <i class="fa fa-address-card icon"></i>
+                        <input class="input-field" type="text" placeholder="Adresse postale" id="adressePost" required> </input>
+                        </div>
+                    
+                        <div class="input-container">
+                        <i class="fa fa-map-marker icon"></i>
+                        <input class="input-field" type="text" placeholder="Code postal" id="codePost" required> </input>
+                        </div>
+
+                        <div class="input-container">
+                        <i class="fa fa-map icon"></i>
+                        <input class="input-field" type="text" placeholder="Ville" id="ville" required> </input>
+                        </div>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-at icon"></i>
+                        <input class="input-field" type="email" placeholder="Email" id="email" required></input>
+                        </div>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-phone icon"></i>
+                        <input class="input-field" type="tel" placeholder="Numéro de téléphone" id="numTel" required></input>
+                        </div>
+
+                    </form>
+                    <button onclick = "updateClient()" class="btn" id="update">Enregistrer</button>
+                </div>
+                <button class="button1" ><a href="tabContracts.html" style="color:#ffffff" ><i class="fas fa-arrow-left"></i>&nbsp Retour</button>
+            </div>
+        
+            <script type="text/javascript">
+
+            /*
+            * Récupère le contractAddress et le addressContratsClient passer dans l'URL
+            */
+                function processUser()
+                {
+                    var parameters = location.search.substring(1).split("&");
+                    var temp = parameters[0].split("=");
+                    _contratsClientAddr = unescape(temp[1]);
+                }
+
+                processUser();
+
+                /*
+                * Etablit la connexion avec Metamask
+                */
+                async function loadWeb3() {
+                    if (window.ethereum) {
+                        window.web3 = new Web3(window.ethereum);
+                        window.ethereum.enable();
+                    }
+                } 
+
+                /*
+                * Charge le contrat 
+                */
+
+                async function loadContract(ABI, contractAddress) {
+                    return await new window.web3.eth.Contract(ABI, contractAddress);
+                }
+
+                var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
+                var addressListClients = "0x17ea2629839501B80ADE13CB5C36D665d6f82BF2";
+                    
+        
+                async function load() {
+                    await loadWeb3();
+                    window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL) ;
+                    var accounts = await ethereum.request({ method: 'eth_accounts' });
+                    account = accounts[0];
+                    await window.contract.methods.getTechnicians().call(function(err,res){
+                        var techniciansList = new Array();
+                        for(let i=0; i<res.length; i++){
+                            techniciansList.push(res[i].toLowerCase());
+                        }
+                        console.log("callback list");
+                        console.log(techniciansList);
+                        if(!techniciansList.includes(account)){
+                            console.log("Disabled");
+                            document.getElementById("update").disabled = true;
+                        }
+                    });
+                    window.contract = await loadContract(ABIContratsClient, _contratsClientAddr); //ACC = _contratsClientAddr
+                    await getInfoClient();
+                }
+
+                async function getInfoClient(){
+                    document.getElementById("nameEntrp").value = await window.contract.methods.nom().call()
+                    document.getElementById("adressePost").value = await window.contract.methods.adressePostale().call()
+                    document.getElementById("codePost").value = await window.contract.methods.codePostal().call()
+                    document.getElementById("ville").value = await window.contract.methods.ville().call()
+                    document.getElementById("numTel").value = await window.contract.methods.tel().call()
+                    document.getElementById("email").value = await window.contract.methods.mail().call()
+
+                }
+                
+                async function updateClient() {
+                    console.log("in update contract");
+                    document.getElementById("update").disabled = true;
+
+                    var accounts = await ethereum.request({ method: 'eth_accounts' });
+                    account = accounts[0];
+                    
+                    const _nom = document.getElementById('nameEntrp').value;
+                    const _adressePostale = document.getElementById('adressePost').value;
+                    const _codePostal = document.getElementById('codePost').value;
+                    const _ville = document.getElementById('ville').value;
+                    const _tel = document.getElementById('numTel').value;
+                    const _mail = document.getElementById('email').value;
+                    
+                    await window.contract.methods.updateClient(_nom,_adressePostale,_codePostal,_ville,_tel,_mail).send({from: account});
+
+                    window.contract = await loadContract(ABIListClients, addressListClients);
+                    await window.contract.methods.updateClient(_contratsClientAddr,_nom,_adressePostale,_codePostal,_ville,_tel,_mail).send({from: account});
+                }
+
+
+                load();
+
+            </script>
+    
+
+
+
+    
+    </body>
+</html>

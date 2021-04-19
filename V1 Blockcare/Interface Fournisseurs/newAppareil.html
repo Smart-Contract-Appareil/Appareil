@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Nouvel appareil</title>
+    <link rel="stylesheet" href="style_newAppareil.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereumjs/browser-builds/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
+    <script type="text/javascript" src="abiTechniciansWL.js"></script>
+    <script type="module" src="abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="abiAppareil.js"></script>
+    <script type="module" src="abiAppareil.js"></script>
+    <script type="text/javascript" src="dataAppareil.js"></script>
+    <script type="module" src="dataAppareil.js"></script>
+    <script type="text/javascript" src="abiContratsClient.js"></script>
+    <script type="module" src="abiContratsClient.js"></script>
+
+
+    </head>
+    
+    <body>
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2><i class="fas fa-tools"></i> BlockCare</h2>
+                <ul>
+                    <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                    <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                    <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Nouvel appareil</div>
+                <div class='titre'>
+                    <h2><i class="fas fa-folder-plus" style="color:black"></i> Ajout d'un nouvel appareil</h2>
+                </div>
+                <div class='formulaire'>
+                    <form>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-clipboard-list icon"></i>
+                        <select name="categorie" id = "cat_select" class = "input-field" required>
+                            <option value="">--------Choisissez une catégorie--------</option>
+                            <option value="Froid">Froid</option>
+                            <option value="Chaud">Chaud</option>
+                            <option value="Climatisation">Climatisation</option>
+                        </select>
+                        </div>
+                    
+                        <div class="input-container">
+                        <i class="fa fa-list icon"></i>
+                        <select name="Type" id = "type_select" class = "input-field" required>
+                            <option value="">------Choisissez un type d'appareil------</option>
+                            <option value="Armoire à température négative">Armoire à température négative</option>
+                            <option value="Armoire à température positive">Armoire à température positive</option>
+                            <option value="Cellule de refroidissement">Cellule de refroidissement</option>
+                            <option value="Grill">Grill</option>
+                            <option value="Plaques">Plaques</option>
+                            <option value="Four">Four</option>
+                            <option value="Chauffe assiettes">Chauffe assiettes</option>
+                            <option value="Bain Marie">Bain Marie</option>
+                            <option value="Ventilateur">Ventilateur</option>
+                        </select>
+                        </div>
+                    
+                        <div class="input-container">
+                        <i class="fa fa-building icon"></i>
+                        <input class="input-field" type="text" placeholder="Marque" id="marque" required></input>
+                        </div>
+
+                        <div class="input-container">
+                        <i class="fa fa-map icon"></i>
+                        <input class="input-field" type="text" placeholder="Référence" id="ref" required></input>
+                        </div>
+                        
+                        <div class="input-container">
+                        <i class="fa fa-sort-numeric-down icon"></i>
+                        <input class="input-field" type="text" placeholder="Numéro de série" id="n_serie" required></input>
+                        </div>
+
+                    </form>
+                    <button onclick = "deployContract()" class="btn" id="deploy">Enregistrer</button>
+                </div>
+
+            </div>
+        
+            <script type="text/javascript">
+
+                function processUser(){
+                    var parameters = location.search.substring(1).split("&");
+                    var temp = parameters[0].split("=");
+                    _contratsClientAddr = unescape(temp[1]);
+                }
+
+                processUser();
+                
+
+                var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
+                async function loadWeb3() {
+                    if (window.ethereum) {
+                        window.web3 = new Web3(window.ethereum);
+                        window.ethereum.enable();
+                    }
+                }    
+                    
+                async function loadContract(ABI, contractAddress) {
+                    return await new window.web3.eth.Contract(ABI, contractAddress);
+                }
+        
+                async function load() {
+                    await loadWeb3();
+                    window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL) ;
+                    var accounts = await ethereum.request({ method: 'eth_accounts' });
+                    account = accounts[0];
+                    var techniciansList = await window.contract.methods.getTechnicians().call();
+                    /*if(!techniciansList.includes(account)){
+                        document.getElementById("deploy").disabled = true;
+                    }*/
+                }
+                
+                async function deployContract() {
+                    document.getElementById("deploy").disabled = true;
+                    var accounts = await ethereum.request({ method: 'eth_accounts' });
+                    account = accounts[0];
+                    
+                    const _cat = document.getElementById('cat_select').value;
+                    const _ap_type = document.getElementById('type_select').value;
+                    const _marque = document.getElementById('marque').value;
+                    const _ref = document.getElementById('ref').value;
+                    const _nb_serie = document.getElementById('n_serie').value;
+                    
+                    //déployer contract
+                    web3.eth.getTransactionCount(account,async(err,txCount)=>{
+                        //smart contract data 
+                        const data = dataAppareil;
+                        let myContract = new web3.eth.Contract(ABIAppareil);
+                        myContract.deploy({
+                            data: data,
+                            arguments: [
+                                _contratsClientAddr,
+                                _cat,
+                                _ap_type,
+                                _marque,
+                                _ref,
+                                _nb_serie,
+                            ]
+                        })
+                        .send({
+                            from: account,
+                            nonce : web3.utils.toHex(txCount),
+                            gasLimit :web3.utils.toHex(4700000),
+                            gasPrice : web3.utils.toHex(web3.utils.toWei('10','gwei'))
+                        })
+                        .on('receipt',async function(receipt){
+                            console.log("Contract address : " + receipt.contractAddress);
+                            window.contract = await loadContract(ABIAppareil,receipt.contractAddress);
+                            console.log(window.contract);
+                            var newAppareilContractAddr = receipt.contractAddress;
+                            window.contract = await loadContract(ABIContratsClient,_contratsClientAddr);
+                            await window.contract.methods.addContract(newAppareilContractAddr,_cat,_ap_type,_marque,_ref,_nb_serie,).send({from: account});
+                        });
+                    });
+                    return false;
+                }
+        
+                load();
+
+            </script>
+    
+
+
+
+    
+    </body>
+</html>

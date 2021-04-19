@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Les contrats</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_tabContrats.css">
+    <link rel="stylesheet" href="style_tabClient.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abiTechniciansWL.js"></script>
+    <script type="module" src="abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="abiContratsClient.js"></script>
+    <script type="module" src="abiContratsClient.js"></script>
+    <script type="text/javascript" src="dataContratsClient.js"></script>
+    <script type="module" src="dataContratsClient.js"></script>
+  
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+            <h2><i class="fas fa-tools"></i> BlockCare</h2>
+              <ul>
+                <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>      
+              </ul> 
+          </div>
+
+          <div class="main_content">
+              <div class="header">Contrats client</div>  
+                <div class="info">
+                    <h2><i class="fas fa-info" style="color:black"></i> Informations personnelles client </h2>
+                    <p>
+                      Nom entreprise : <span id="nomEntrp">Loading...</span> <br></br>
+                      Adresse postale : <span id="adresseP">Loading...</span> <br></br>
+                      Code postal : <span id="codeP">Loading...</span> <br></br>
+                      Ville : <span id="ville">Loading...</span> <br></br>
+                      Email : <span id="email">Loading...</span> <br></br>
+                      Numéro de téléphone : <span id="numTel">Loading...</span> <br></br>
+
+              
+                    </p>
+                </div> 
+                
+                <div class="btn-group">
+                  <button><a onclick="goTo2('updateClient')" style="color:#ffffff"><i class="fas fa-edit"></i> Modifier les informations client</a></button>
+                  <button><a onclick="goTo2('newAppareil')" style="color:#ffffff"><i class="fas fa-cart-plus"></i> Ajouter un nouvel appareil</a></button>
+                </div>
+            
+
+                  <div class="hist">
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Liste de mes contrats</h2><br>
+                  <p>
+                  <table class ="listeAppareils">
+                      <thead>
+                          <tr>
+                              <th>Adresse contrat</th>
+                              <th>Catégorie</th>
+                              <th>Type</th>
+                              <th>Marque</th>
+                              <th>Référence</th>
+                              <th>Numéro de série</th>
+                              <th>Statut</th>
+          
+                          </tr>
+                      </thead>
+                      <tbody></tbody>
+                  </table>
+                  </p>
+                </div>
+
+              </div>
+
+            
+        
+        </div>
+               
+
+      <script type="text/javascript">
+
+          /*
+          * Récupère addressContratsClient de tabClient pour charger le bon contract
+          */
+          function processUser(){
+            var parameters = location.search.substring(1).split("&");
+            var temp = parameters[0].split("=");
+            addressContratsClient = unescape(temp[1]);
+          }
+
+          processUser();
+
+
+          //var addressContratsClient = "0xFB77281c7a78b46Dc8D80451A5737E24c9581137";
+          async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+          }  
+    
+          async function loadContract(addcont){
+            return await new window.web3.eth.Contract(ABIContratsClient, addcont);
+          }
+    
+          async function load(){
+            await loadWeb3();
+            var accounts = await ethereum.request({ method: 'eth_accounts'});
+            account = accounts[0];
+            window.contract = await loadContract(addressContratsClient);
+            console.log(window.contract);
+            let clientsAdresses = await window.contract.methods.getContracts().call(function(err,res){
+                console.log(res);
+                createAppareilsTable(res);
+            });
+            await getInfoClient();
+          }
+    
+          function createAppareilsTable(addresses){
+            const tbody = document.querySelector('.listeAppareils tbody');
+            for(let i = 0; i<addresses.length ; i++){
+                if(addresses[i]!="0x0000000000000000000000000000000000000000"){
+                    var clientInfo = window.contract.methods.contracts(addresses[i]).call(function(err,res){
+                        console.log("res = ");
+                        console.log(res);
+                        
+                        let tr = document.createElement('tr');
+
+                        const tdAddress = document.createElement('td');
+                        tdAddress.innerText = addresses[i];
+                        tr.appendChild(tdAddress);
+  
+                        const tdCat = document.createElement('td');
+                        tdCat.innerText = res.categorie;
+                        tr.appendChild(tdCat);
+  
+                        const tdType = document.createElement('td');
+                        tdType.innerText = res.a_type;
+                        tr.appendChild(tdType);
+  
+                        const tdMarque = document.createElement('td');
+                        tdMarque.innerText = res.brand;
+                        tr.appendChild(tdMarque);
+  
+                        const tdRef = document.createElement('td');
+                        tdRef.innerText = res.refer;
+                        tr.appendChild(tdRef);
+  
+                        const tdNSerie = document.createElement('td');
+                        tdNSerie.innerText = res.serial_n;
+                        tr.appendChild(tdNSerie);
+  
+                        
+                        var tdStatutImg = document.createElement("img");
+                        if(res.statut == 1){
+                          tdStatutImg.src = "check.png";
+                          //tdStatutImg.innerHTML = '<input type="image" src="check.png" class = "img-container"/> '
+                        }
+                        else if (res.statut == 0){
+                          tdStatutImg.src = "warning-sign.png";
+                          //tdStatutImg.innerHTML = '<input type="image" src="warning-sign.png" class = "img-container"/> '
+                        }
+                        else if (res.statut == -1){
+                          tdStatutImg.src = "delete.png";
+                          //tdStatutImg.innerHTML = '<input type="image" src="delete.png" class = "img-container"/> '
+                        }
+                        tr.appendChild(tdStatutImg);
+                        
+                        tr.addEventListener('click',function(){
+                          goTo(addresses[i]);
+                        });
+
+                      
+                        tbody.appendChild(tr);
+                  });
+  
+                  
+                };
+            }
+          }
+          
+        
+          //Récupère les informations du client
+          async function getInfoClient() {
+            document.getElementById("nomEntrp").innerHTML = await window.contract.methods.nom().call()
+            document.getElementById("adresseP").innerHTML = await window.contract.methods.adressePostale().call()
+            document.getElementById("codeP").innerHTML = await window.contract.methods.codePostal().call()
+            document.getElementById("ville").innerHTML = await window.contract.methods.ville().call()
+            document.getElementById("numTel").innerHTML = await window.contract.methods.tel().call()
+            document.getElementById("email").innerHTML = await window.contract.methods.mail().call()
+          }
+
+          /*
+          * Envoyer vers une adresse URL lorsque le bouton est actionné
+          */
+
+          function goTo(CA){
+            var url = "infoContrat.html?CA=" + encodeURIComponent(CA) + "&ACC=" + encodeURIComponent(addressContratsClient);
+            window.location.href = url
+          }
+          
+
+          function goTo2(page){
+            var url = page + ".html?ACC=" + encodeURIComponent(addressContratsClient);
+            window.location.href = url
+          }
+    
+    
+          /*//Allows passing addresses to next page
+          function selectAppareil(){
+            //TO DO :
+            let contratsClientAddr = addressContratsClient;
+            let appareilAddr = document.getElementById('test').value; //TO DO : Make line clickable and get appareil contract address
+            localStorage.setItem('ContratsClientAddr',contratsClientAddr);
+            localStorage.setItem('AppareilAddr',appareilAddr);
+          }*/
+    
+          load();
+    
+      </script>
+
+  </body>
+</html>

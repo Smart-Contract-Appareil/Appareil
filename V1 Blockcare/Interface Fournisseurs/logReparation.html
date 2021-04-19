@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>logReparation</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_logReparation.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abiAppareil.js"></script>
+    <script type="text/javascript" src="abiContratsClient.js"></script>
+    <script type="module" src="abiContratsClient.js"></script>
+  
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+              <h2><i class="fas fa-tools"></i> BlockCare</h2>
+              <ul>
+                <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>          
+              </ul> 
+          </div>
+          <div class="main_content">
+              <div class="header">Travaux d'intervention</div>  
+              <div class="app">
+                <h1>Appareil XXXX</h1>
+                <div class="info">
+                    <h2><i class="fas fa-toolbox" style="color:black"></i> Intervention : Réparation</h2>
+                    
+                    <p>
+                        Numéro de contrat : <span id="num1">Loading...</span><br>
+                        Statut : <span id="statut">Loading...</span>
+                    </p>
+
+                    <form> 
+                        <fieldset>                     
+                          <legend><b> L'appareil est-il réparé ?</b></legend>
+                            <input type="radio" id="oui"
+                             name="radios" value="oui" checked>
+                            <label for="oui">Oui</label>
+            
+                            <input type="radio" id="non"
+                             name="radios" value="non">
+                            <label for="non">Non</label>        
+                    
+                        </fieldset> 
+
+                    </form>
+                
+                    <div id="travaux">
+                    <form>
+                        <fieldset>
+                          <legend><b> Quels sont les travaux qui ont été faits ?</b></legend>
+                          <div>
+                            <input id="Travail1" type="checkbox" value="Travail1"/><label for="Travail1"> Travail 1</label><br>
+                            <input id="Travail2" type="checkbox" value="Travail2"/><label for="Travail2"> Travail 2</label><br>
+                            <input id="Travail3" type="checkbox" value="Travail3"/><label for="Travail3"> Travail 3</label><br>
+                            <input id="Travail4" type="checkbox" value="Travail4"/><label for="Travail4"> Travail 4</label><br>
+                            <input id="Travail5" type="checkbox" value="Travail5"/><label for="Travail5"> Travail 5</label><br>
+                            <input id="Travail6" type="checkbox" value="Travail6"/><label for="Travail6"> Travail 6</label><br>
+                            <input id="Autre1" type="checkbox" value="Autre1"/><label for="Autre1"> Autre</label>
+                            <input id="Fill1" type="text" name="Fill1" value="" disabled/><label for="Fill1"></label><br>           
+                         </div>
+                        </fieldset><br>
+                    </form>
+                    <button class="button1" onclick="setInfoIntervention1()"><i class="fas fa-save"></i>  &nbspEnregistrer</button>
+                    <button class="button1"><a href="infoContrat.html" style="color:#ffffff"><i class="fas fa-arrow-left"></i> &nbspRetour</a></button>
+                    </div> 
+
+                    <div id="raisons">
+                    <form>
+                        <fieldset>
+                          <legend><b>Quelles-en sont les raisons ?</b></legend>
+                          <div>
+                            <input id="Raison1" type="checkbox" value="Raison1"/><label for="Raison1"> Raison 1</label><br>
+                            <input id="Raison2" type="checkbox" value="Raison2"/><label for="Raison2"> Raison 2</label><br>
+                            <input id="Raison3" type="checkbox" value="Raison3"/><label for="Raison3"> Raison 3</label><br>
+                            <input id="Raison4" type="checkbox" value="Raison4"/><label for="Raison4"> Raison 4</label><br>
+                            <input id="Raison5" type="checkbox" value="Raison5"/><label for="Raison5"> Raison 5</label><br>
+                            <input id="Raison6" type="checkbox" value="Raison6"/><label for="Raison6"> Raison 6</label><br>
+                            <input id="Autre2" type="checkbox" value="Autre2"/><label for="Autre2"> Autre</label>
+                            <input id="Fill2" type="text" name="Fill2" value="" disabled/><label for="Fill2"></label><br>  
+                         </div>
+                        </fieldset><br>
+                    </form>
+                    <button class="button1" onclick="setInfoIntervention2()"><i class="fas fa-save"></i>  &nbspEnregistrer</button>
+                    <button class="button1"><a href="infoContrat.html" style="color:#ffffff"><i class="fas fa-arrow-left"></i> &nbspRetour</a></button>
+                    </div>     
+                </div>
+              </div>
+            </div>
+      </div>
+
+
+      <script type="text/javascript">
+        function processUser()
+        {
+            var parameters = location.search.substring(1).split("&");
+            var temp = parameters[0].split("=");
+            contractAddress = unescape(temp[1]); //ne pas mettre var 
+            temp = parameters[1].split("=");
+            addressContratsClient = unescape(temp[1]); //ne pas mettre var 
+        }
+
+        processUser();
+
+        //Connexion metamask
+        async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+            
+        async function loadContract(ABI,address) {
+                return await new window.web3.eth.Contract(ABI, address);
+            }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract(ABIAppareil,contractAddress);
+            await infoInterv();
+        }
+
+        load();
+
+        // Récupérer et afficher numéro contrat, intervention et statut
+        async function infoInterv(){
+            document.getElementById("num1").innerHTML = contractAddress;
+            const statut = await window.contract.methods.statut().call()
+            document.getElementById("statut").innerHTML = statut;
+        }
+
+        // Si oui l'appareil est réparé on affiche les travaux, si non on affiche les raisons
+        document.getElementById('Autre1').onchange = function() {
+            document.getElementById('Fill1').disabled = !this.checked;
+            };
+        document.getElementById('Autre2').onchange = function() {
+            document.getElementById('Fill2').disabled = !this.checked;
+            };
+
+            var radios = document.getElementsByName("radios");
+            var travaux =  document.getElementById("travaux");
+            var raisons =  document.getElementById("raisons");
+            travaux.style.display = 'block';   // show
+            raisons.style.display = 'none';// hide
+            for(var i = 0; i < radios.length; i++) {
+                radios[i].onclick = function() {
+                    var val = this.value;
+                    if(val == 'oui'){
+                        travaux.style.display = 'block';
+                        raisons.style.display = 'none';
+                    }
+                    else if(val == 'non'){
+                        travaux.style.display = 'none';
+                        raisons.style.display = 'block';
+                    }    
+            
+                }
+            }
+            
+
+        // L'appareil est réparé : rentrer les travaux faits 
+            async function setInfoIntervention1 (){
+
+                var accounts = await ethereum.request({ method: 'eth_accounts'});
+                var account = accounts[0];
+
+                var travaux_selected = new Array(); //Création d'une Array
+                var travaux = []; 
+                var autre1 = document.getElementById("Autre1");
+
+                travaux[0] = document.getElementById("Travail1")
+                travaux[1] = document.getElementById("Travail2");
+                travaux[2] = document.getElementById("Travail3");
+                travaux[3] = document.getElementById("Travail4");
+                travaux[4] = document.getElementById("Travail5");
+                travaux[5] = document.getElementById("Travail6"); 
+    
+
+                //Pousser toutes les checkboxes sélectionnées dans l'Array
+                for (var i = 0; i < travaux.length; i++) {
+                    if (travaux[i].checked) {
+                        travaux_selected.push(travaux[i].value);
+                    }
+                    
+                }
+                if (autre1.checked){
+                        var fill1 = document.getElementById("Fill1");
+                        travaux_selected.push(fill1.value);
+                    }
+
+                
+                if (travaux_selected.length > 0) {
+                    console.log("Travaux effectués : " + travaux_selected);
+                    const Appareil1 = await window.contract.methods.logIntervention(addressContratsClient,1,travaux_selected).send({from:account});
+                    window.contract = await loadContract(ABIContratsClient,addressContratsClient);
+                    await window.contract.methods.updateContractStatus(contractAddress,1).send({from: account});
+                }
+            
+            }
+
+        // L'appareil n'est pas réparé : rentrer les raisons
+            async function setInfoIntervention2 (){
+
+                var accounts = await ethereum.request({ method: 'eth_accounts'});
+                var account = accounts[0];
+
+                var raisons_selected = new Array(); //Création d'une Array
+                var raisons = []; 
+                var autre2 = document.getElementById("Autre2");
+
+               raisons[0] = document.getElementById("Raison1")
+               raisons[1] = document.getElementById("Raison2");
+               raisons[2] = document.getElementById("Raison3");
+               raisons[3] = document.getElementById("Raison4");
+               raisons[4] = document.getElementById("Raison5");
+               raisons[5] = document.getElementById("Raison6"); 
+
+                //Pousser toutes les checkboxes sélectionnées dans l'Array
+                for (var i = 0; i < raisons.length; i++) {
+                    if (raisons[i].checked) {
+                        raisons_selected.push(raisons[i].value);
+                    }
+                }
+                if (autre2.checked){
+                        var fill2 = document.getElementById("Fill2");
+                        raisons_selected.push(fill2.value);
+                }
+                if (raisons_selected.length > 0) {
+                    console.log("Raisons : " + raisons_selected);
+                    const Appareil2 = await window.contract.methods.logIntervention(addressContratsClient,0,raisons_selected).send({from:account});
+                }
+            
+            }       
+
+
+
+      </script>
+
+  </body>
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>BlockCare</title>
+    <link rel="stylesheet" href="style_login.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://kit.fontawesome.com/a076d05399.js"></script>
+    <script type="text/javascript" src="abiTechniciansWL.js"></script>
+    <script type="module" src="abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="abiListClients.js"></script>
+    <script type="module" src="abiListClients.js"></script>
+  </head>
+
+  <body>
+
+    <div class="cuisine-img">
+      <div class="content">
+        <header><i class="fas fa-tools"></i> BlockCare</header>
+          <!--<button id="client" onclick="openAccueil()">Connexion</button><br>-->
+          <button id="client" onclick="openAccueilClient()">Client</button><br>
+          <button id="fournisseur" onclick="openAccueilFournisseur()">Fournisseur</button>
+          
+          
+      </div>
+    </div>
+
+    <script>
+
+      var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
+      var addressListClients = "0x17ea2629839501B80ADE13CB5C36D665d6f82BF2";
+
+      async function loadWeb3() {
+        if (window.ethereum) {
+            window.web3 = new Web3(window.ethereum);
+            window.ethereum.enable();
+        }
+      }    
+      
+      async function loadContract(ABI, contractAddress) {
+        return await new window.web3.eth.Contract(ABI, contractAddress);
+      }
+
+      async function load() {
+        await loadWeb3();
+        var accounts = await ethereum.request({ method: 'eth_accounts' });
+        account = accounts[0];
+        
+
+        /*if(!techniciansList.includes(account)){
+            document.getElementById("deployContratsClient").disabled = true;
+        }*/
+      }
+
+      load();
+ 
+      async function openAccueilClient(){
+        let msg,url;
+        console.log("My account : " + account);
+        console.log("in openAccueilClient");
+        window.contract = await loadContract(ABIListClients, addressListClients) ;
+        await window.contract.methods.getClientsWallets().call(async function(err,res1){ 
+            var clientWalletsList = new Array();
+            for(let i=0; i<res1.length; i++){
+              clientWalletsList.push(res1[i].toLowerCase());
+            }
+            console.log(clientWalletsList);
+            if(clientWalletsList.includes(account)){
+              console.log("in if after getting clientWalletsList");
+              await window.contract.methods.walletToContract(account).call(async function(err,contratClientAddr){
+                var ACC = contratClientAddr ;
+                console.log(ACC);
+                await window.contract.methods.getClientsAddresses().call(function(err,res2){
+                  var contratsClientList = new Array();
+                  for(let i=0; i<res2.length; i++){
+                    contratsClientList.push(res2[i].toLowerCase());
+                  }
+                  console.log("ContratsClientsList : ");
+                  console.log(contratsClientList);
+                  if(contratsClientList.includes(ACC.toLowerCase())){
+                    console.log("in if before changing page");
+                    url = "/Interface%20Clients/pageAccueil.html?CCA=" + encodeURIComponent(contratClientAddr);
+                    window.location.href = url
+                  }
+                  else{
+                    msg = "Connexion impossible. Vos identifiants ne sont pas reconnus par BlockCare."
+                    window.alert(msg);
+                  }
+                });
+              });
+            }     
+        });
+      }
+        
+        
+
+      async function openAccueilFournisseur(){
+        var msg, url;
+        window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL);
+        await window.contract.methods.getTechnicians().call(function(err,res){
+          var techniciansList = new Array();
+          for(let i=0; i<res.length; i++){
+              techniciansList.push(res[i].toLowerCase());
+          }
+          if(techniciansList.includes(account)){
+          url = "/Interface%20Fournisseurs/pageAccueil.html";
+          window.location.href = url
+          }
+          else{
+            msg = "Connexion impossible. Vos identifiants ne sont pas reconnus par BlockCare."
+              window.alert(msg);
+          }
+        });
+      }
+
+
+
+    </script>
+
+
+  </body>
+</html>

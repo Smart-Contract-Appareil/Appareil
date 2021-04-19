@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page d'accueil</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_pageAccueil.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+  
+    <div class="wrapper">
+        <div class="sidebar">
+            <h2><i class="fas fa-tools"></i> BlockCare</h2>
+            <ul>
+                <li><a onclick="goTo('pageAccueil')"><i class="fas fa-building"></i>Page d'accueil</a></li> 
+                <li><a onclick="goTo('infoClient')"><i class="fas fa-user-circle"></i>Mes informations</a></li> 
+                <li><a onclick="goTo('tabContrats')"><i class="fas fa-list-ol"></i>Mes contrats</a></li> 
+                <li><a onclick="goTo('aide')"><i class="fas fa-info-circle"></i>Aide</a></li>
+            </ul> 
+        </div>
+        <div class="main_content">
+        
+            <img src="cuisine.jpg" alt="Image d'une cuisine">
+            <div class="center">Bienvenue sur BlockCare</div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        /*
+        * Récupère addressContratsClient de tabClient pour charger le bon contract
+        */
+        function processUser()
+        {
+          var parameters = location.search.substring(1).split("&");
+          var temp = parameters[0].split("=");
+          addressContratsClient = unescape(temp[1]);
+          console.log(addressContratsClient);
+        }
+        processUser();
+
+        function goTo(page){
+          var url = page +".html?CCA=" + encodeURIComponent(addressContratsClient);
+          window.location.href = url
+        }
+  
+    </script>
+</html>

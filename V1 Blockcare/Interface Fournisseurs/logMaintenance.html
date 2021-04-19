@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>logMaintenance</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_logMaintenance.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abiAppareil.js"></script>
+  
+
+    <body>
+      <div class="wrapper">
+          <div class="sidebar">
+              <h2><i class="fas fa-tools"></i> BlockCare</h2>
+              <ul>
+                <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>          
+              </ul> 
+          </div>
+          <div class="main_content">
+              <div class="header">Travaux d'intervention</div>  
+              <div class="app">
+                <h1>Appareil XXXX</h1>
+                <div class="info">
+                    <h2><i class="fas fa-toolbox" style="color:black"></i> Intervention : Maintenance</h2>
+                    
+                    <p>
+                        Numéro de contrat : <span id="num1">Loading...</span><br>
+                        Statut : <span id="statut">Loading...</span>
+                    </p>
+                        <form id="events">
+                            <fieldset>
+                              <legend><b>Quels sont les travaux de maintenance qui ont été effectués sur l'appareil ?</b></legend>
+                              <div>
+                                <input id="mtn1" type="checkbox" name="mtn1" value="1"/><label for="mtn1"> Maintenance 1</label></td><br>
+                                <input id="mtn2" type="checkbox" name="mtn2" value="2"/><label for="mtn2"> Maintenance 2</label></td><br>
+                                <input id="mtn3" type="checkbox" name="mtn3" value="3"/><label for="mtn3"> Maintenance 3</label></td><br>
+                                <input id="mtn4" type="checkbox" name="mtn4" value="4"/><label for="mtn4"> Maintenance 4</label></td><br>
+                                <input id="mtn5" type="checkbox" name="mtn5" value="5"/><label for="mtn5"> Maintenance 5</label></td><br>
+                                <input id="mtn6" type="checkbox" name="mtn6" value="6"/><label for="mtn6"> Maintenance 6</label></td><br>
+                             </div>
+                            </fieldset><br>
+                        </form>
+                        <button class="button1" onclick="setInfoIntervention()"><i class="fas fa-save"></i>  &nbspEnregistrer</button>
+                        <button class="button1"><a href="infoContrat.html" style="color:#ffffff"><i class="fas fa-arrow-left"></i> &nbspRetour</a></button>
+                </div>
+            </div> 
+                  
+                        
+
+      <script type="text/javascript">
+        function processUser()
+        {
+            var parameters = location.search.substring(1).split("&");
+            var temp = parameters[0].split("=");
+            contractAddress = unescape(temp[1]); //ne pas mettre var 
+            temp = parameters[1].split("=");
+            addressContratsClient = unescape(temp[1]); //ne pas mettre var 
+        }
+
+        processUser();
+
+        //Connexion metamask
+        //var contractAddress = "0xDFf05A5D3c2e7680757e35487286378EF95bc59E"; //Adresse contrat déployé
+
+        async function loadWeb3() {
+                if (window.ethereum) {
+                    window.web3 = new Web3(window.ethereum);
+                    window.ethereum.enable();
+                }
+            }    
+            
+        async function loadContract() {
+                return await new window.web3.eth.Contract(ABIAppareil, contractAddress);
+            }
+
+        async function load() {
+            await loadWeb3();
+            window.contract = await loadContract();
+            await infoInterv();
+        }
+
+        load();
+
+        // Récupérer et afficher numéro contrat, intervention et statut
+        async function infoInterv(){
+            document.getElementById("num1").innerHTML = contractAddress;
+            const statut = await window.contract.methods.statut().call()
+            document.getElementById("statut").innerHTML = statut;
+        }
+
+        //Rentrer les travaux faits après l'intervention de maintenance
+        async function setInfoIntervention (){
+
+            var accounts = await ethereum.request({ method: 'eth_accounts'});
+            var account = accounts[0];
+
+            var events_selected = new Array(); //Création d'une Array
+            var events = document.getElementById("events"); //Référence à la table events
+            var chks = events.getElementsByTagName("input"); //Référence à tous les checkboxes de la table events
+
+            //Pousser toutes les checkboxes sélectionnées dans l'Array
+            for (var i = 0; i < chks.length; i++) {
+                if (chks[i].checked) {
+                    events_selected.push(chks[i].name);
+                }
+            }
+            if (events_selected.length > 0) {
+            console.log("Travaux effectués : " + events_selected);
+            const Appareil1 = await window.contract.methods.logIntervention(addressContratsClient,1,events_selected).send({from:account});
+            }
+        }
+
+      </script>
+
+  </body>
+</html>

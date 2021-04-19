@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+       <meta charset="UTF-8">
+    <title>Les clients</title>
+    <link rel="stylesheet" href="style_tabClient.css">
+    <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script type="text/javascript" src="abiTechniciansWL.js"></script>
+    <script type="module" src="abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="abiListClients.js"></script>
+    <script type="module" src="abiListClients.js"></script>
+
+
+    </head>
+    
+    <body>
+        
+        <div class="wrapper">
+            <div class="sidebar">
+                <h2><i class="fas fa-tools"></i> BlockCare</h2>
+                <ul>
+                    <li><a href="pageAccueil.html"><i class="fas fa-building"></i>Page d'accueil</a></li>
+                    <li><a href="tabClient.html"><i class="fas fa-address-book"></i>Clients</a></li>
+                    <li><a href="tabTechnicien.html"><i class="fas fa-toolbox"></i>Techniciens</a></li>
+                    
+                </ul> 
+            
+            </div>
+        </div>
+
+            <div class="main_content">
+                <div class="header">Les clients</div>
+            
+                <div class='titre'>
+                    <h2><i class="fas fa-clipboard-list" style="color:black"></i> Liste des clients</h2><br><br>
+                    <button class="button1"><a href="newClient.html" style="color:#ffffff"><i class="fas fa-folder-plus"></i>&nbsp Ajouter nouveau client </a></button>
+
+                </div>
+                <table class ="listeClient">
+                    <thead>
+                        <tr>
+                            <th>Numéro contrat client</th>
+                            <th>Nom entreprise</th>
+                            <th>N° et libellé de la voie</th>
+                            <th>Code postal</th>
+                            <th>Ville</th>
+                            <th>Numéro de tel</th>
+                            <th>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table><br><br>
+        
+                
+            </div>
+        
+            <script type="text/javascript">
+                var addressListClients = "0x17ea2629839501B80ADE13CB5C36D665d6f82BF2";
+
+                async function loadWeb3() {
+                    if (window.ethereum) {
+                        window.web3 = new Web3(window.ethereum);
+                        window.ethereum.enable();
+                    }
+                }    
+
+                // Charge le contrat 
+                async function loadContract(){
+                    return await new window.web3.eth.Contract(ABIListClients, addressListClients);
+                }
+
+                async function load(){
+                    await loadWeb3();
+                    var accounts = await ethereum.request({ method: 'eth_accounts'});
+                    account = accounts[0];
+                    window.contract = await loadContract();
+                    console.log(window.contract);
+                    let clientsAdresses = await window.contract.methods.getClientsAddresses().call(function(err,res){
+                        console.log(res);
+                        createClientsTable(res);
+                    });
+                    
+                }
+
+
+                function createClientsTable(addresses){
+                    const tbody = document.querySelector('.listeClient tbody');
+                    for(let i = 0; i<addresses.length ; i++){
+                        if(addresses[i]!="0x0000000000000000000000000000000000000000"){
+                            var clientInfo = window.contract.methods.clients(addresses[i]).call(function(err,res){
+                                console.log("res = ");
+                                console.log(res);
+                                
+                                let tr = document.createElement('tr');
+
+                                const tdAddress = document.createElement('td');
+                                tdAddress.innerText = addresses[i] ;
+                                tr.appendChild(tdAddress);
+
+                                const tdName = document.createElement('td');
+                                tdName.innerText = res.nom;
+                                tr.appendChild(tdName);
+
+                                const tdPostalAddr = document.createElement('td');
+                                tdPostalAddr.innerText = res.adressePostale;
+                                tr.appendChild(tdPostalAddr);
+
+                                const tdPostalCode = document.createElement('td');
+                                tdPostalCode.innerText = res.codePostal;
+                                tr.appendChild(tdPostalCode);
+
+                                const tdCity = document.createElement('td');
+                                tdCity.innerText = res.ville;
+                                tr.appendChild(tdCity);
+
+                                const tdTel = document.createElement('td');
+                                tdTel.innerText = res.tel;
+                                tr.appendChild(tdTel);
+
+                                const tdMail = document.createElement('td');
+                                tdMail.innerText = res.mail;
+                                tr.appendChild(tdMail);
+                                tr.addEventListener('click',function(){
+                                    goTo(addresses[i]);
+                                })
+
+                                tbody.appendChild(tr);
+                            });
+                        }
+                    }
+                }
+
+                /*
+                * Envoyer vers une adresse URL lorsque le bouton est actionné
+                */
+                function goTo(ACC){
+                    var url = "tabContrats.html?ACC=" + encodeURIComponent(ACC);
+                    window.location.href = url
+                }
+
+                load();
+    
+        
+                
+            </script>
+    
+
+
+
+    
+    </body>
+</html>
