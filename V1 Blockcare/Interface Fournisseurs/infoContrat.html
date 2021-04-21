@@ -6,10 +6,11 @@
     <link rel="stylesheet" href="style_infoContrat.css">
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script type="text/javascript" src="./abiAppareil.js"></script>
+    <script type="text/javascript" src="../abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="../abiAppareil.js"></script>
   
 
-    <body onload="getInfoAppareil()">
+    <body>
       <div class="wrapper">
           <div class="sidebar">
             <h2><i class="fas fa-tools"></i> BlockCare</h2>
@@ -40,12 +41,12 @@
                     
                 <div class="btn-group">
                     
-                    <button onclick="openIntervention()"><i class="fas fa-toolbox"></i>  Travaux d'intervention</button>
-                    <button onclick="goTo('updateAppareil')" type="submit"><i class="fas fa-info"></i>  Modifier informations de l'appareil</button>
-                    <button onclick="goTo('devisBis')" type="submit"><i class="fas fa-info"></i>  Nouveau devis d'intervention</button>
-                    <button onclick="goTo('historiquePJ')" type="submit"><i class="fas fa-info"></i>  Historique des pièces jointes</button>
+                    <button id = "travaux" onclick="openIntervention()"><i class="fas fa-toolbox"></i>  Travaux d'intervention</button>
+                    <button id = "modifAppareil" onclick="goTo('updateAppareil')" type="submit"><i class="fas fa-info"></i>  Modifier informations de l'appareil</button>
+                    <button id = "newDoc" onclick="goTo('devisBis')" type="submit"><i class="fas fa-info"></i>  Nouveau devis d'intervention</button>
+                    <button id = "histPJ" onclick="goTo('historiquePJ')" type="submit"><i class="fas fa-info"></i>  Historique des pièces jointes</button>
                 </div>
-              
+                
 
 
 
@@ -73,7 +74,7 @@
                
 
     <script type="text/javascript">
-
+        var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
         class evt{
             txhash;
             blockn;
@@ -136,8 +137,8 @@
         /*
         * Charge le contrat 
         */
-        async function loadContract() {
-                return await new window.web3.eth.Contract(ABIAppareil, contractAddress);
+        async function loadContract(ABI, address) {
+            return await new window.web3.eth.Contract(ABI, address);
         }
         
         /*
@@ -266,25 +267,44 @@
         */
         async function load() {
             await loadWeb3();
-            window.contract = await loadContract();
-            getInfoAppareil();
-            // Récupère tous les events
-            var events = await loadEvents();
-            setTimeout(function(){ 
-                let tempEvents = events;
-                if(tempEvents.length>0){
-                    console.log(tempEvents);
-                    events = assembleDuplicateTransactions(tempEvents); //retourne les transactions faites (1 ligne = 1 transaction)
-                    /// MUST DO EVERY TREATMENT HERE FROM NOW ON ///
-                    console.log(events);
-                    var sortedEvents = events.slice().sort((a,b)=>b.time_date - a.time_date);
-                    console.log(sortedEvents);
-                    createTable(sortedEvents);
+            var accounts = await ethereum.request({ method: 'eth_accounts'}); 
+            var account = accounts[0];
+            window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL);
+            await window.contract.methods.getTechnicians().call(async function(err,res){
+                var techniciansList = new Array();
+                for(let i=0; i<res.length; i++){
+                    techniciansList.push(res[i].toLowerCase());
+                }
+                if(!techniciansList.includes(account)){
+                    let msg = "Accès non autorisé. Vous n'êtes pas reconnnu comme technicien par BlockCare."
+                    window.alert(msg);
+                    document.getElementById("travaux").disabled = true;
+                    document.getElementById("modifAppareil").disabled = true;
+                    document.getElementById("newDoc").disabled = true;
+                    document.getElementById("histPJ").disabled = true;
                 }
                 else{
-                    console.log("length = 0");
+                    window.contract = await loadContract(ABIAppareil, contractAddress);
+                    getInfoAppareil();
+                    // Récupère tous les events
+                    var events = await loadEvents();
+                    setTimeout(function(){ 
+                        let tempEvents = events;
+                        if(tempEvents.length>0){
+                            console.log(tempEvents);
+                            events = assembleDuplicateTransactions(tempEvents); //retourne les transactions faites (1 ligne = 1 transaction)
+                            /// MUST DO EVERY TREATMENT HERE FROM NOW ON ///
+                            console.log(events);
+                            var sortedEvents = events.slice().sort((a,b)=>b.time_date - a.time_date);
+                            console.log(sortedEvents);
+                            createTable(sortedEvents);
+                        }
+                        else{
+                            console.log("length = 0");
+                        }
+                    }, 2000);
                 }
-            }, 2000);
+            });
         }
         
         /*

@@ -6,10 +6,10 @@
     <link rel="stylesheet" href="style_tabClient.css">
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script type="text/javascript" src="./abiTechniciansWL.js"></script>
-    <script type="module" src="./abiTechniciansWL.js"></script>
-    <script type="text/javascript" src="./abiListClients.js"></script>
-    <script type="module" src="./abiListClients.js"></script>
+    <script type="text/javascript" src="../abiTechniciansWL.js"></script>
+    <script type="module" src="../abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="../abiListClients.js"></script>
+    <script type="module" src="../abiListClients.js"></script>
 
 
     </head>
@@ -56,6 +56,7 @@
             </div>
         
             <script type="text/javascript">
+                var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
                 var addressListClients = "0x17ea2629839501B80ADE13CB5C36D665d6f82BF2";
 
                 async function loadWeb3() {
@@ -66,21 +67,34 @@
                 }    
 
                 // Charge le contrat 
-                async function loadContract(){
-                    return await new window.web3.eth.Contract(ABIListClients, addressListClients);
+
+                async function loadContract(ABI, address) {
+                    return await new window.web3.eth.Contract(ABI, address);
                 }
 
                 async function load(){
                     await loadWeb3();
-                    var accounts = await ethereum.request({ method: 'eth_accounts'});
-                    account = accounts[0];
-                    window.contract = await loadContract();
-                    console.log(window.contract);
-                    let clientsAdresses = await window.contract.methods.getClientsAddresses().call(function(err,res){
-                        console.log(res);
-                        createClientsTable(res);
+                    var accounts = await ethereum.request({ method: 'eth_accounts'}); 
+                    var account = accounts[0];
+                    window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL);
+                    await window.contract.methods.getTechnicians().call(async function(err,res){
+                        var techniciansList = new Array();
+                        for(let i=0; i<res.length; i++){
+                            techniciansList.push(res[i].toLowerCase());
+                        }
+                        if(!techniciansList.includes(account)){
+                            let msg = "Accès non autorisé. Vous n'êtes pas reconnnu comme technicien par BlockCare."
+                            window.alert(msg);
+                        }
+                        else{
+                            window.contract = await loadContract(ABIListClients, addressListClients);
+                            console.log(window.contract);
+                            let clientsAdresses = await window.contract.methods.getClientsAddresses().call(function(err,res){
+                                console.log(res);
+                                createClientsTable(res);
+                            });
+                        }
                     });
-                    
                 }
 
 

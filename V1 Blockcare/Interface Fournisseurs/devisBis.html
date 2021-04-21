@@ -11,7 +11,8 @@
             <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/pdfmake.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.70/vfs_fonts.js"></script>
-            <script type="text/javascript" src="./abiAppareil.js"></script>
+            <script type="text/javascript" src="../abiTechniciansWL.js"></script>
+            <script type="text/javascript" src="../abiAppareil.js"></script>
         </head>
     </head>
 
@@ -63,6 +64,7 @@
         
         
         <script>
+            var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
 
             function processUser()
             {
@@ -105,8 +107,8 @@
                 }
             }    
 
-            async function loadContract() {
-                return await new window.web3.eth.Contract(ABIAppareil, contractAddress);
+            async function loadContract(ABI, address) {
+                return await new window.web3.eth.Contract(ABI, address);
             }
 
             
@@ -114,8 +116,8 @@
             //Envoyer les données du devis dans la blockchain
             async function setInfoDevis() {
                 //Détection automatique du compte
-                var accounts = await ethereum.request({ method: 'eth_accounts'}); 
-                var account = accounts[0];
+                accounts = await ethereum.request({ method: 'eth_accounts'}); 
+                account = accounts[0];
 
                 // function to extract and submit table data.
                 var doc_tab = document.getElementById('empTable');
@@ -150,15 +152,38 @@
                 var intervenant = document.getElementById('intervenant').value;
                 console.log("prix tot : ", prixTOT);
                 console.log("tableauFinal : ", tableauFinal);
-                const DataPJ = await window.contract.methods.setPJ(type_doc, intervenant, prixTOT, tableauFinal).send({from: account});
+                if(isNaN(prixTOT)){
+                    let msg = "Vous n'avez pas correctement renseigné le tableau, opération impossible";
+                    window.alert(msg);
+                }
+                else{
+                    const DataPJ = await window.contract.methods.setPJ(type_doc, intervenant, prixTOT, tableauFinal).send({from: account});
+                }
+                
             }
 
 
 
             async function load() {
                 await loadWeb3();
-                window.contract = await loadContract();
-                createTable();
+                var accounts = await ethereum.request({ method: 'eth_accounts'}); 
+                var account = accounts[0];
+                window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL);
+                await window.contract.methods.getTechnicians().call(async function(err,res){
+                    var techniciansList = new Array();
+                    for(let i=0; i<res.length; i++){
+                        techniciansList.push(res[i].toLowerCase());
+                    }
+                    if(!techniciansList.includes(account)){
+                        document.getElementById('bt').disabled = true;
+                        let msg = "Accès non autorisé. Vous n'êtes pas reconnnu comme technicien par BlockCare."
+                        window.alert(msg);
+                    }
+                    else{
+                        window.contract = await loadContract(ABIAppareil, contractAddress);
+                        createTable();
+                    }
+                });
             }
 
             load();

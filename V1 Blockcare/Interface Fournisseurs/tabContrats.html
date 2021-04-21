@@ -7,12 +7,12 @@
     <link rel="stylesheet" href="style_tabClient.css">
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
-    <script type="text/javascript" src="./abiTechniciansWL.js"></script>
-    <script type="module" src="./abiTechniciansWL.js"></script>
-    <script type="text/javascript" src="./abiContratsClient.js"></script>
-    <script type="module" src="./abiContratsClient.js"></script>
-    <script type="text/javascript" src="./dataContratsClient.js"></script>
-    <script type="module" src="./dataContratsClient.js"></script>
+    <script type="text/javascript" src="../abiTechniciansWL.js"></script>
+    <script type="module" src="../abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="../abiContratsClient.js"></script>
+    <script type="module" src="../abiContratsClient.js"></script>
+    <script type="text/javascript" src="../dataContratsClient.js"></script>
+    <script type="module" src="../dataContratsClient.js"></script>
   
 
     <body>
@@ -77,7 +77,7 @@
                
 
       <script type="text/javascript">
-
+          var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
           /*
           * Récupère addressContratsClient de tabClient pour charger le bon contract
           */
@@ -98,21 +98,35 @@
             }
           }  
     
-          async function loadContract(addcont){
-            return await new window.web3.eth.Contract(ABIContratsClient, addcont);
+          async function loadContract(ABI, address) {
+            return await new window.web3.eth.Contract(ABI, address);
+          
           }
     
           async function load(){
             await loadWeb3();
-            var accounts = await ethereum.request({ method: 'eth_accounts'});
-            account = accounts[0];
-            window.contract = await loadContract(addressContratsClient);
-            console.log(window.contract);
-            let clientsAdresses = await window.contract.methods.getContracts().call(function(err,res){
-                console.log(res);
-                createAppareilsTable(res);
+            var accounts = await ethereum.request({ method: 'eth_accounts'}); 
+            var account = accounts[0];
+            window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL);
+            await window.contract.methods.getTechnicians().call(async function(err,res){
+              var techniciansList = new Array();
+              for(let i=0; i<res.length; i++){
+                  techniciansList.push(res[i].toLowerCase());
+              }
+              if(!techniciansList.includes(account)){
+                  let msg = "Accès non autorisé. Vous n'êtes pas reconnnu comme technicien par BlockCare."
+                  window.alert(msg);
+              }
+              else{
+                window.contract = await loadContract(ABIContratsClient,addressContratsClient);
+                console.log(window.contract);
+                let clientsAdresses = await window.contract.methods.getContracts().call(function(err,res){
+                    console.log(res);
+                    createAppareilsTable(res);
+                });
+                await getInfoClient();
+              }
             });
-            await getInfoClient();
           }
     
           function createAppareilsTable(addresses){
@@ -169,7 +183,6 @@
                           goTo(addresses[i]);
                         });
 
-                      
                         tbody.appendChild(tr);
                   });
   

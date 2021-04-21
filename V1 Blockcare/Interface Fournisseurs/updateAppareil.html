@@ -7,14 +7,14 @@
     <script src="https://kit.fontawesome.com/b99e675b6e.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereumjs/browser-builds/dist/ethereumjs-tx/ethereumjs-tx-1.3.3.min.js"></script>
-    <script type="text/javascript" src="./abiTechniciansWL.js"></script>
-    <script type="module" src="./abiTechniciansWL.js"></script>
-    <script type="text/javascript" src="./abiAppareil.js"></script>
-    <script type="module" src="./abiAppareil.js"></script>
-    <script type="text/javascript" src="./dataAppareil.js"></script>
-    <script type="module" src="./dataAppareil.js"></script>
-    <script type="text/javascript" src="./abiContratsClient.js"></script>
-    <script type="module" src="./abiContratsClient.js"></script>
+    <script type="text/javascript" src="../abiTechniciansWL.js"></script>
+    <script type="module" src="../abiTechniciansWL.js"></script>
+    <script type="text/javascript" src="../abiAppareil.js"></script>
+    <script type="module" src="../abiAppareil.js"></script>
+    <script type="text/javascript" src="../dataAppareil.js"></script>
+    <script type="module" src="../dataAppareil.js"></script>
+    <script type="text/javascript" src="../abiContratsClient.js"></script>
+    <script type="module" src="../abiContratsClient.js"></script>
 
 
     </head>
@@ -89,7 +89,7 @@
             </div>
         
             <script type="text/javascript">
-
+                var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
             /*
             * Récupère le contractAddress et le addressContratsClient passer dans l'URL
             */
@@ -118,33 +118,32 @@
                 * Charge le contrat 
                 */
 
-                async function loadContract(ABI, contractAddress) {
-                    return await new window.web3.eth.Contract(ABI, contractAddress);
+                async function loadContract(ABI, address) {
+                    return await new window.web3.eth.Contract(ABI, address);
                 }
-
-                //var _contratsClientAddr = "0x2C5DBab54909de8c063AF2398d4f10Aa3570baA9";
-                var addressTechniciansWL = "0xbd854dE55A8Abf854f7d3e6aF7635C0Cc4c8627E";
                     
-        
+
                 async function load() {
                     await loadWeb3();
                     window.contract = await loadContract(ABITechniciansWL, addressTechniciansWL) ;
                     var accounts = await ethereum.request({ method: 'eth_accounts' });
                     account = accounts[0];
-                    await window.contract.methods.getTechnicians().call(function(err,res){
+                    await window.contract.methods.getTechnicians().call(async function(err,res){
                         var techniciansList = new Array();
                         for(let i=0; i<res.length; i++){
                             techniciansList.push(res[i].toLowerCase());
                         }
-                        console.log("callback list");
-                        console.log(techniciansList);
                         if(!techniciansList.includes(account)){
-                            console.log("Disabled");
                             document.getElementById("update").disabled = true;
+                            let msg = "Accès non autorisé. Vous n'êtes pas reconnnu comme technicien par BlockCare."
+                            window.alert(msg);
+                        }
+                        else{
+                            window.contract = await loadContract(ABIAppareil, contractAddress) ;
+                            await getInfoAppareil();
                         }
                     });
-                    window.contract = await loadContract(ABIAppareil, contractAddress) ;
-                    await getInfoAppareil();
+                    
                 }
 
                 async function getInfoAppareil(){
@@ -157,10 +156,14 @@
                 
                 async function updateContract() {
                     console.log("in update contract");
-                    document.getElementById("update").disabled = true;
-
                     var accounts = await ethereum.request({ method: 'eth_accounts' });
                     account = accounts[0];
+
+                    const old_cat = await window.contract.methods.categorie().call()
+                    const old_type = await window.contract.methods.a_type().call()
+                    const old_marque = await window.contract.methods.brand().call()
+                    const old_ref = await window.contract.methods.refer().call()
+                    const old_serial_n = await window.contract.methods.serial_n().call()
                     
                     const _cat = document.getElementById('cat_select').value;
                     const _ap_type = document.getElementById('type_select').value;
@@ -168,10 +171,18 @@
                     const _ref = document.getElementById('ref').value;
                     const _nb_serie = document.getElementById('n_serie').value;
                     
-                    await window.contract.methods.editAppareil(_cat,_ap_type,_marque,_ref,_nb_serie).send({from: account});
-
-                    window.contract = await loadContract(ABIContratsClient, addressContratsClient) ;
-                    await window.contract.methods.updateContract(contractAddress,_cat,_ap_type,_marque,_ref,_nb_serie).send({from: account});
+                    if(old_cat == _cat & old_type == _ap_type & old_marque == _marque& old_ref == _ref
+                        & old_serial_n == _nb_serie){
+                        let msg = "Vous n'avez modifié aucun des champs. Aucune information n'a donc été modifiée."
+                        window.alert(msg);
+                    }
+                    else{
+                        document.getElementById("update").disabled = true;
+                        await window.contract.methods.editAppareil(_cat,_ap_type,_marque,_ref,_nb_serie).send({from: account});
+                        window.contract = await loadContract(ABIContratsClient, addressContratsClient) ;
+                        await window.contract.methods.updateContract(contractAddress,_cat,_ap_type,_marque,_ref,_nb_serie).send({from: account});
+                    }
+                    
                 }
         
 
